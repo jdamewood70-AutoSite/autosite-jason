@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoSite — Creator Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <script>
+    // EmailJS shim → routes every emailjs.send(...) call to Resend via our
+    // send-email Netlify function. Dashboard email now sends as Tricia.
+    window.emailjs = {
+      init: function(){},
+      send: function(_service, _template, params){
+        return fetch('/.netlify/functions/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: params.email,
+            subject: params.title,
+            html: params.message,
+            from: 'Tricia Maple-Damewood <tricia@autosite.website>',
+            replyTo: 'tricia@autosite.website'
+          })
+        }).then(async function(r){
+          var d = {};
+          try { d = await r.json(); } catch(e){}
+          if (!r.ok || !d.ok) throw new Error((d && d.error) || ('send failed ' + r.status));
+          return d;
+        });
+      }
+    };
+    </script>
+<style>
+:root{--cream:#faf8f4;--white:#fff;--gold:#c9a84c;--gold-light:#e8c96a;--gold-dim:rgba(201,168,76,0.1);--dark:#1c1a17;--charcoal:#2e2b26;--muted:#9a9189;--border:rgba(201,168,76,0.2);--bl:rgba(28,26,23,0.08);--green:#4a9e6b;--gd:rgba(74,158,107,0.1);--red:#c0504d;--rd:rgba(192,80,77,0.1);--blue:#4a7eb5;--bd:rgba(74,126,181,0.1);--orange:#e08040;--od:rgba(224,128,64,0.1);--sh:0 2px 16px rgba(28,26,23,0.08);--shl:0 8px 40px rgba(28,26,23,0.12)}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--cream);color:var(--dark);font-family:'Lato',sans-serif;font-weight:400;line-height:1.65;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--dark);display:flex;flex-direction:column;z-index:100;box-shadow:2px 0 20px rgba(0,0,0,0.15);overflow:hidden}
+.sl{padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.slm{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
+.sls{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.ab{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)}
+.abr{display:flex;align-items:center;justify-content:space-between}
+.abl strong{display:block;font-size:12px;color:var(--white)}
+.abl span{font-size:10px;color:rgba(255,255,255,0.35);line-height:1.4}
+.tgl{position:relative;width:38px;height:20px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tt{position:absolute;inset:0;background:rgba(255,255,255,0.15);border-radius:20px;transition:.25s;cursor:pointer}
+.th{position:absolute;width:14px;height:14px;background:rgba(255,255,255,0.5);border-radius:50%;top:3px;left:3px;transition:.25s;pointer-events:none}
+.tgl input:checked~.tt{background:var(--gold)}.tgl input:checked~.th{transform:translateX(18px);background:var(--dark)}
+.aon{display:none;font-size:10px;color:var(--gold);margin-top:6px;letter-spacing:1px}.aon.show{display:block}
+.su{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.sav{width:32px;height:32px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);font-weight:700;flex-shrink:0}
+.sn{font-size:12px;font-weight:600;color:var(--white)}.st{font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px}
+.nav{padding:10px 0;flex:1;overflow-y:auto;min-height:0}
+.ns{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.2);padding:10px 18px 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;transition:all .18s;border-left:3px solid transparent;text-decoration:none}
+.ni:hover{color:var(--white);background:rgba(255,255,255,0.04)}.ni.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,0.06)}
+.nic{font-size:13px;width:15px;text-align:center;flex-shrink:0}
+.nb{margin-left:auto;background:var(--gold);color:var(--dark);font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.nb.g{background:var(--green);color:var(--white)}.nb.o{background:var(--orange);color:var(--white)}
+.sf{padding:12px 18px;border-top:1px solid rgba(255,255,255,0.06);font-size:10px;color:rgba(255,255,255,0.2);font-style:italic}
+.pspeed{padding:14px 16px;border-top:1px solid rgba(255,255,255,0.06);}
+.pspeed-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.pspeed-title span{font-size:9px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;}
+.pspeed-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.pspeed-val{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.pspeed-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+input.pslider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;outline:none;margin:8px 0 12px;}
+input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;}
+.pspeed-modes{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
+.pmode{padding:6px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;border-radius:2px;}
+.pmode:hover{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);}
+.pmode.slow-on{background:rgba(96,165,250,0.12);border-color:#60a5fa;color:#60a5fa;}
+.pmode.push-on{background:rgba(82,214,138,0.12);border-color:#52d68a;color:#52d68a;}
+.pdays{display:flex;gap:2px;margin-top:8px;}
+.pday{flex:1;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:9px;font-weight:700;cursor:pointer;color:rgba(255,255,255,0.4);transition:all .12s;border-radius:2px;}
+.pday:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,.7);}
+.pday.off{background:rgba(239,68,68,0.12);border-color:#ef4444;color:#ef4444;}
+.main{margin-left:240px;min-height:100vh}
+.tb{background:var(--white);border-bottom:1px solid var(--bl);padding:13px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(0,0,0,0.04)}
+.tbt{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}
+.tbr{display:flex;align-items:center;gap:14px}
+.tbd{font-size:11px;color:var(--muted)}
+.apill{display:none;font-size:11px;background:var(--od);border:1px solid rgba(224,128,64,0.2);padding:4px 11px;border-radius:20px;color:var(--orange);font-weight:600}.apill.show{display:block}
+.spill{display:flex;align-items:center;gap:5px;background:var(--gd);border:1px solid rgba(74,158,107,0.2);padding:5px 11px;border-radius:20px;font-size:11px;color:var(--green);font-weight:600}
+.sd{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.content{padding:28px 32px}
+.page{display:none}.page.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.sc{background:var(--white);border:1px solid var(--bl);padding:20px 22px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.sc.g::before{background:var(--green)}.sc.b::before{background:var(--blue)}
+.slbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.sval{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark);line-height:1}
+.ssub{font-size:11px;color:var(--muted);margin-top:4px}
+.shd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.shd h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:600}
+.shd p{font-size:12px;color:var(--muted);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;cursor:pointer;font-family:'Lato',sans-serif;font-size:12px;font-weight:600;letter-spacing:.4px;transition:all .18s;text-decoration:none}
+.btp{background:var(--gold);color:var(--dark)}.btp:hover{background:var(--gold-light)}
+.bts{background:var(--white);color:var(--dark);border:1px solid var(--bl);box-shadow:var(--sh)}.bts:hover{border-color:var(--gold);color:var(--gold)}
+.btg{background:transparent;color:var(--muted);border:1px solid var(--bl)}.btg:hover{color:var(--dark);border-color:var(--muted)}
+.btgr{background:var(--green);color:var(--white)}.btgr:hover{background:#3d8a5d}
+.bto{background:var(--orange);color:var(--white)}
+.btsm{padding:5px 12px;font-size:11px}.btxs{padding:3px 9px;font-size:10px}
+.card{background:var(--white);border:1px solid var(--bl);box-shadow:var(--sh)}
+.tw{background:var(--white);border:1px solid var(--bl);box-shadow:var(--sh);overflow:hidden}
+.ttb{padding:12px 18px;border-bottom:1px solid var(--bl);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sw{flex:1;min-width:160px;position:relative}
+.sw input{width:100%;padding:7px 11px 7px 30px;border:1px solid var(--bl);background:var(--cream);font-family:'Lato',sans-serif;font-size:12px;color:var(--dark);outline:none;transition:border-color .18s}
+.sw input:focus{border-color:var(--gold);background:var(--white)}.sw::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:10px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bl);background:var(--cream);color:var(--muted);transition:all .18s}
+.pill.active{background:var(--gold);color:var(--dark);border-color:var(--gold)}.pill:hover:not(.active){border-color:var(--gold);color:var(--gold)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bl);background:var(--cream);font-weight:600}
+tbody tr{border-bottom:1px solid rgba(28,26,23,0.04);transition:background .13s;cursor:pointer}
+tbody tr:hover{background:rgba(201,168,76,0.03)}tbody tr:last-child{border-bottom:none}
+td{padding:12px 16px;font-size:12px;vertical-align:middle}
+.tbz{font-weight:600;font-size:13px}.tbs{color:var(--muted);font-size:11px;margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.bn{background:var(--bd);color:var(--blue)}.bbl{background:rgba(28,26,23,0.06);color:var(--muted)}.brd{background:var(--gold-dim);color:#8a6a1e}
+.bsn{background:var(--od);color:var(--orange)}.bst{background:var(--gd);color:var(--green)}.bcu{background:var(--bd);color:var(--blue)}.bsk{background:rgba(28,26,23,0.06);color:var(--muted)}
+.qc{background:var(--white);border:1px solid var(--bl);padding:18px 22px;box-shadow:var(--sh);margin-bottom:10px;transition:box-shadow .18s,border-color .18s}
+.qc:hover{box-shadow:var(--shl);border-color:var(--gold)}
+.qb{font-weight:700;font-size:14px;margin-bottom:3px}.qm{font-size:12px;color:var(--muted)}.qa{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.sp{display:none;margin-top:12px;padding:14px;background:var(--cream);border:1px solid var(--bl)}.sp.open{display:block;animation:fi .2s ease}
+.sos{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.so{padding:9px 6px;border:1px solid var(--bl);background:var(--white);text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);transition:all .18s}
+.so:hover{border-color:var(--orange);color:var(--orange)}.so.sel{border-color:var(--orange);background:var(--od);color:var(--orange)}
+.sn2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark);display:block;line-height:1;margin-bottom:2px}
+.sreason label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
+.ssel{width:100%;padding:8px 11px;border:1px solid var(--bl);background:var(--white);font-family:'Lato',sans-serif;font-size:12px;color:var(--dark);outline:none;cursor:pointer}.ssel:focus{border-color:var(--orange)}
+.vn{display:none;margin-top:7px;padding:8px 11px;background:var(--od);border:1px solid rgba(224,128,64,0.2);font-size:11px;color:var(--orange)}
+.dp{position:fixed;right:-500px;top:0;bottom:0;width:500px;background:var(--white);box-shadow:-8px 0 40px rgba(0,0,0,0.12);z-index:200;transition:right .28s ease;overflow-y:auto;display:flex;flex-direction:column}
+.dp.open{right:0}
+.dph{padding:20px 24px;border-bottom:1px solid var(--bl);display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:var(--white);z-index:10}
+.dpb2{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}.dpo{font-size:12px;color:var(--muted);margin-top:3px}
+.dpc{background:none;border:none;font-size:17px;color:var(--muted);cursor:pointer;padding:4px}.dpc:hover{color:var(--dark)}
+.dpbd{padding:20px 24px;flex:1}.dps{margin-bottom:22px}
+.dpsl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:9px;font-weight:600}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ii label{font-size:10px;color:var(--muted);display:block;margin-bottom:2px}.ii span{font-size:12px;color:var(--dark);font-weight:500}
+.sprev{border:1px solid var(--bl);overflow:hidden;margin-bottom:12px}
+.spb{background:var(--charcoal);padding:6px 10px;display:flex;align-items:center;gap:5px}
+.dr{width:8px;height:8px;border-radius:50%;background:#ff5f57}.dy{width:8px;height:8px;border-radius:50%;background:#ffbd2e}.dg{width:8px;height:8px;border-radius:50%;background:#28c840}
+.su2{font-size:9px;color:rgba(255,255,255,0.35);margin-left:5px;font-family:monospace}
+.sth{width:100%;height:130px;background:linear-gradient(135deg,#1a2a3a,#2d4a3e);display:flex;align-items:center;justify-content:center;text-align:center}
+.stbn{font-family:'Playfair Display',serif;font-size:16px;color:var(--white);font-weight:700}
+.stct{font-size:9px;color:rgba(255,255,255,0.45);margin-top:3px;letter-spacing:2px;text-transform:uppercase}
+.sab{padding:8px 11px;background:var(--cream);display:flex;justify-content:space-between;align-items:center}
+.sab span{font-size:11px;color:var(--muted)}
+.ee{border:1px solid var(--bl);overflow:hidden}
+.eh{background:var(--cream);padding:9px 13px;border-bottom:1px solid var(--bl)}
+.ef{display:flex;align-items:center;gap:7px;margin-bottom:4px}.ef:last-child{margin-bottom:0}
+.ef label{font-size:10px;color:var(--muted);width:22px;flex-shrink:0}.ef span{font-size:12px;color:var(--dark)}
+.si{width:100%;border:none;background:transparent;font-family:'Lato',sans-serif;font-size:12px;font-weight:600;color:var(--dark);outline:none}
+.ebw{padding:12px 13px}
+.ebody{width:100%;min-height:130px;border:none;background:transparent;font-family:'Lato',sans-serif;font-size:12px;color:var(--dark);line-height:1.7;outline:none;resize:vertical}
+.ef2{padding:9px 13px;background:var(--cream);border-top:1px solid var(--bl);display:flex;justify-content:space-between;align-items:center}
+.cc{font-size:10px;color:var(--muted)}
+.al{display:flex;flex-direction:column}
+.ai{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid rgba(28,26,23,0.04)}.ai:last-child{border-bottom:none}
+.ad{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px}
+.ad.g{background:var(--green)}.ad.b{background:var(--blue)}.ad.o{background:var(--orange)}
+.at{font-size:12px;color:var(--dark);line-height:1.5}.atm{font-size:10px;color:var(--muted);margin-top:1px}
+.mo{display:none;position:fixed;inset:0;background:rgba(28,26,23,0.5);z-index:300;align-items:center;justify-content:center}.mo.open{display:flex;animation:fi .18s ease}
+.em{background:var(--white);max-width:880px;width:95%;max-height:93vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shl)}
+.emh{padding:16px 22px;border-bottom:1px solid var(--bl);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.emt{font-family:'Playfair Display',serif;font-size:17px;font-weight:600}.ems{font-size:11px;color:var(--muted);margin-top:2px}
+.emcl{background:none;border:none;font-size:17px;color:var(--muted);cursor:pointer}.emcl:hover{color:var(--dark)}
+.embd{display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;min-height:0}
+.emc{padding:16px;border-right:1px solid var(--bl);overflow-y:auto;background:var(--cream);display:flex;flex-direction:column;gap:14px}
+.esl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:7px}
+.lz{border:2px dashed var(--border);background:var(--white);padding:16px;text-align:center;cursor:pointer;transition:all .18s}
+.lz:hover{border-color:var(--gold);background:var(--gold-dim)}
+.lpw{display:none;margin-bottom:7px}.lpw img{max-height:44px;max-width:140px;object-fit:contain}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.cp{padding:8px;border:1px solid var(--bl);cursor:pointer;background:var(--white);transition:border-color .18s}
+.cp:hover{border-color:var(--gold)}.cp.sel{border:2px solid var(--gold)}
+.cps{display:flex;gap:4px;margin-bottom:3px}.cpsw{width:15px;height:15px}.cpn{font-size:10px;font-weight:600;color:var(--dark)}
+.cpick{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cpick label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
+.cpick input[type=color]{width:100%;height:30px;border:1px solid var(--bl);cursor:pointer;padding:2px}
+.ep{display:flex;flex-direction:column;overflow:hidden}
+.pb2{background:var(--charcoal);padding:7px 13px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.pu{flex:1;background:rgba(255,255,255,0.07);padding:3px 9px;font-size:9px;color:rgba(255,255,255,0.35);font-family:monospace}
+.pmb{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border:none;padding:3px 9px;font-size:10px;cursor:pointer;transition:all .18s}.pmb.active{background:var(--gold);color:var(--dark)}
+.pc{flex:1;overflow:auto;background:#ddd;display:flex;align-items:flex-start;justify-content:center;padding:12px}
+.pc iframe{border:none;background:white;box-shadow:0 4px 18px rgba(0,0,0,0.15)}
+.am{background:var(--white);padding:28px;max-width:480px;width:92%;box-shadow:var(--shl);position:relative;max-height:90vh;overflow-y:auto}
+.am h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:5px}
+.am p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.mcb{position:absolute;top:13px;right:16px;background:none;border:none;font-size:17px;color:var(--muted);cursor:pointer}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fg label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.fi{background:var(--cream);border:1px solid var(--bl);color:var(--dark);font-family:'Lato',sans-serif;font-size:13px;font-weight:300;padding:10px 14px;outline:none;transition:border-color .18s;width:100%}.fi:focus{border-color:var(--gold)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.mac{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.scm{background:var(--white);padding:28px;max-width:400px;width:90%;box-shadow:var(--shl);position:relative}
+.scm h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin-bottom:8px}
+.scm p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:20px}
+.cl{padding:12px 16px;border-left:3px solid var(--gold);background:var(--gold-dim);margin:14px 0}
+.cl p{font-size:12px;color:var(--dark);line-height:1.65}.cl.o{border-left-color:var(--orange);background:var(--od)}
+.uz{border:2px dashed var(--border);background:var(--cream);padding:36px 24px;text-align:center;cursor:pointer;transition:all .18s;margin-bottom:18px}
+.uz:hover{border-color:var(--gold);background:var(--gold-dim)}
+.empty{text-align:center;padding:48px 24px}
+.ei{font-size:40px;margin-bottom:12px}.et{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:6px}.esu{font-size:13px;color:var(--muted);line-height:1.6;max-width:340px;margin:0 auto 18px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:var(--white);padding:11px 18px;font-size:12px;box-shadow:var(--shl);z-index:400;transform:translateY(60px);opacity:0;transition:all .28s ease;display:flex;align-items:center;gap:7px;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+.pov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:199}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bl)}
+
+.pspeed{padding:14px 16px;border-top:1px solid rgba(255,255,255,0.06);}
+.pspeed-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.pspeed-title span{font-size:9px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;}
+.pspeed-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.pspeed-val{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.pspeed-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+input.pslider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;outline:none;margin:8px 0 12px;}
+input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;}
+.pspeed-modes{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
+.pmode{padding:6px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;border-radius:2px;}
+.pmode:hover{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);}
+.pmode.slow-on{background:rgba(96,165,250,0.12);border-color:#60a5fa;color:#60a5fa;}
+.pmode.push-on{background:rgba(82,214,138,0.12);border-color:#52d68a;color:#52d68a;}
+.pdays{display:flex;gap:2px;margin-top:8px;}
+.pday{flex:1;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:9px;font-weight:700;cursor:pointer;color:rgba(255,255,255,0.4);transition:all .12s;border-radius:2px;}
+.pday:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,.7);}
+.pday.off{background:rgba(239,68,68,0.12);border-color:#ef4444;color:#ef4444;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sl"><div class="slm">AutoSite</div><div class="sls">Creator Dashboard</div></div>
+  <div class="ab">
+      <div class="abr" style="margin-bottom:10px">
+        <div class="abl"><strong>Master Auto Mode</strong><span>Runs the whole pipeline</span></div>
+        <label class="tgl"><input type="checkbox" id="autoTgl" onchange="toggleSwitch('auto_mode',this.checked)"><span class="tt"></span><span class="th"></span></label>
+      </div>
+      <div class="abr" style="margin-bottom:10px">
+        <div class="abl"><strong>📱 MMS Sending</strong><span>Text gun on/off</span></div>
+        <label class="tgl"><input type="checkbox" id="mmsTgl" onchange="toggleSwitch('mms_send',this.checked)"><span class="tt"></span><span class="th"></span></label>
+      </div>
+      <div class="abr">
+        <div class="abl"><strong>✉️ Email Sending</strong><span>Email gun on/off</span></div>
+        <label class="tgl"><input type="checkbox" id="emailTgl" onchange="toggleSwitch('email_send',this.checked)"><span class="tt"></span><span class="th"></span></label>
+      </div>
+      <div class="aon" id="aonNote">⚡ Auto mode active</div>
+    </div>
+  <div class="su">
+    <div class="sav">T</div>
+    <div><div class="sn">Tricia Maple-Damewood</div><div class="st">Steubenville OH Territory</div></div>
+  </div>
+  <nav class="nav">
+    <div class="ns">My Work</div>
+    <a class="ni active" id="ni-home" onclick="go('home',this)" href="#"><span class="nic">🏠</span> Home</a>
+    <a class="ni" id="ni-contacts" onclick="go('contacts',this)" href="#"><span class="nic">👥</span> My Contacts<span class="nb" id="bc">0</span></a>
+    <a class="ni" id="ni-queue" onclick="go('queue',this)" href="#"><span class="nic">📋</span> Ready to Send<span class="nb" id="bq">0</span></a>
+    <a class="ni" id="ni-inbox" onclick="go('inbox',this)" href="#"><span class="nic">💬</span> Replies<span class="nb g" id="bi">0</span></a>
+    <a class="ni" id="ni-upsell" onclick="go('upsell',this)" href="#"><span class="nic">⬆️</span> Upsell Queue<span class="nb o" id="bu">0</span></a>
+    <div class="ns" style="margin-top:6px;">My Business</div>
+    <a class="ni" id="ni-customers" onclick="go('customers',this)" href="#"><span class="nic">⭐</span> My Customers</a>
+    <a class="ni" id="ni-sites" onclick="go('sites',this)" href="#"><span class="nic">🌐</span> Their Websites</a>
+    <a class="ni" id="ni-import" onclick="go('import',this)" href="#"><span class="nic">📂</span> Add Contacts</a>
+  </nav>
+  <div class="pspeed">
+    <div class="pspeed-title">Pipeline Pace <span id="psWeekNote"></span></div>
+    <div class="pspeed-row">
+      <div>
+        <div class="pspeed-val"><span id="psVal" style="color:var(--gold)">15</span><span style="font-size:13px;color:var(--muted);font-weight:400;margin-left:5px;">leads/day</span></div>
+        <div class="pspeed-sub" id="psSub">~105 per week · 6 active days</div>
+      </div>
+    </div>
+    <input type="range" class="pslider" id="psSlider" min="5" max="30" value="15" step="1" oninput="updatePace(this.value)"/>
+    <div class="pspeed-modes">
+      <button class="pmode" id="pmodeSlow" onclick="setSlowWeek()">🧊 Slow Week</button>
+      <button class="pmode" id="pmodePush" onclick="setPushWeek()">🔥 Push Week</button>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:6px;">Day off:</div>
+    <div class="pdays" id="pdayRow"></div>
+  </div>
+  <div class="sf">tricia@autosite.website</div>
+</aside>
+
+<main class="main">
+  <div class="tb">
+    <div class="tbt" id="ttl">Good morning, Tricia</div>
+    <div class="tbr">
+      <span class="tbd" id="tdate"></span>
+      <div class="apill" id="apill">⚡ Auto Mode On
+    </div>
+      <a href="/territory-marketplace.html" style="padding:8px 14px;background:var(--gold);color:var(--dark);text-decoration:none;border-radius:4px;font-weight:600;cursor:pointer;font-size:12px;margin-right:10px;display:inline-block;">🗺️ Territories</a>
+      <div class="spill"><div class="sd"></div> System Ready</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="page active" id="page-home">
+      <div class="sr">
+        <div class="sc"><div class="slbl">Total Contacts</div><div class="sval" id="stot">0</div><div class="ssub">in your list</div></div>
+        <div class="sc"><div class="slbl">Ready to Send</div><div class="sval" id="srdy">0</div><div class="ssub">awaiting review</div></div>
+        <div class="sc g"><div class="slbl">Replies</div><div class="sval" id="srep">0</div><div class="ssub">need response</div></div>
+        <div class="sc b"><div class="slbl">Customers</div><div class="sval" id="scust">0</div><div class="ssub">signed up</div></div>
+      </div>
+      <div class="cl o" id="acallout" style="display:none;"><p><strong>⚡ Auto Mode is On.</strong> Queue runs automatically. Replies still come to you.</p></div>
+      <div class="card" style="padding:22px 26px;margin-bottom:22px;">
+        <div class="shd"><div><h2>How your pipeline works</h2><p>Automatic vs. what needs you</p></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px;">
+          <div><div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:8px;">Automatic</div><div style="font-size:12px;color:var(--muted);line-height:2.1;">→ Finds businesses every day<br>→ Builds sample websites<br>→ Writes personalized pitches<br>→ Routes standard replies<br>→ Fires untouched leads at 24hrs<br>→ Fires unfinished edits at 48hrs</div></div>
+          <div><div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px;">Needs You</div><div style="font-size:12px;color:var(--muted);line-height:2.1;">→ Review queue before auto-fire<br>→ Customize site colors and logo<br>→ Edit pitch in your own voice<br>→ Reply to warm leads fast<br>→ Work upsell queue within 24hrs<br>→ Flip Auto Mode when unavailable</div></div>
+        </div>
+        <div class="cl" style="margin-bottom:0;margin-top:14px;"><p><strong>The 24/48 rule:</strong> Untouched lead = fires at 24hrs. Started editing but didn't finish = fires as original at 48hrs. You get a heads-up 4 hours before either.</p></div>
+      </div>
+      <div class="shd"><div><h2>Get Moving</h2></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div class="card" style="padding:18px;cursor:pointer;" onclick="goByName('import')"><div style="font-size:26px;margin-bottom:9px;">📂</div><div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:600;margin-bottom:4px;">Add Contacts</div><div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Add someone and we'll build their site.</div><span class="btn btp btsm">Add Contact →</span></div>
+        <div class="card" style="padding:18px;cursor:pointer;" onclick="goByName('queue')"><div style="font-size:26px;margin-bottom:9px;">📋</div><div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:600;margin-bottom:4px;">Review Queue</div><div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;">See what's ready. Customize or send.</div><span class="btn bts btsm">View Queue →</span></div>
+        <div class="card" style="padding:18px;cursor:pointer;" onclick="goByName('inbox')"><div style="font-size:26px;margin-bottom:9px;">💬</div><div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:600;margin-bottom:4px;">Check Replies</div><div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Reply within 30 minutes when you can.</div><span class="btn bts btsm">View Replies →</span></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-contacts">
+      <div class="shd"><div><h2>My Contacts</h2><p>Everyone in your list</p></div><div style="display:flex;gap:7px;"><button class="btn bts btsm" onclick="goByName('import')">+ Import</button><button class="btn btp btsm" onclick="openAdd()">+ Add One</button></div></div>
+      <div class="tw">
+        <div class="ttb"><div class="sw"><input type="text" placeholder="Search contacts..." oninput="filterC(this.value)"/></div>
+          <div class="pills"><div class="pill active" onclick="filterS('all',this)">All</div><div class="pill" onclick="filterS('ready',this)">Ready</div><div class="pill" onclick="filterS('snoozed',this)">Snoozed</div><div class="pill" onclick="filterS('sent',this)">Sent</div><div class="pill" onclick="filterS('replied',this)">Replied</div><div class="pill" onclick="filterS('customer',this)">Customers</div></div>
+        </div>
+        <table><thead><tr><th>Business</th><th>Category</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody id="ctb"></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-queue">
+      <div class="shd"><div><h2>Ready to Send</h2><p>Review before auto-fire</p></div><button class="btn btg btsm" onclick="sendAll()">Send All →</button></div>
+      <div id="ql"></div>
+    </div>
+
+    <div class="page" id="page-inbox">
+      <div class="shd"><div><h2>Replies</h2><p>Reply within 30 minutes when you can</p></div></div>
+      <div id="ril"><div class="empty"><div class="ei">💬</div><div class="et">No replies yet</div><div class="esu">When someone writes back it shows up here.</div></div></div>
+    </div>
+
+    <div class="page" id="page-upsell">
+      <div class="shd"><div><h2>Upsell Queue</h2><p>Handle within 24 hours</p></div></div>
+      <div class="cl o"><p><strong>These contacts mentioned booking, menus, ordering, or custom features.</strong> Don't let them auto-onboard at a basic plan.</p></div>
+      <div id="uql" style="margin-top:14px;"><div class="empty"><div class="ei">⬆️</div><div class="et">Upsell queue empty</div><div class="esu">Contacts mentioning booking, menus, or galleries land here.</div></div></div>
+    </div>
+
+    <div class="page" id="page-customers">
+      <div class="shd"><div><h2>My Customers</h2><p>Paying monthly</p></div></div>
+      <div class="empty"><div class="ei">⭐</div><div class="et">No customers yet</div><div class="esu">Paying customers show up here once signed up.</div><button class="btn btp" onclick="goByName('queue')">Go to Queue</button></div>
+    </div>
+
+    <div class="page" id="page-sites">
+      <div class="shd"><div><h2>Their Websites</h2><p>Sample sites built for your contacts</p></div></div>
+      <div class="empty"><div class="ei">🌐</div><div class="et">No sites yet</div><div class="esu">Add contacts and sites appear automatically.</div><button class="btn btp" onclick="goByName('import')">Add Contacts</button></div>
+    </div>
+
+    <div class="page" id="page-import">
+      <div class="shd" style="margin-bottom:22px;"><div><h2>Add Contacts</h2><p>One at a time or import a spreadsheet</p></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
+        <div class="card" style="padding:22px;"><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:5px;">Add One Manually</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Best for warm personal contacts</div><button class="btn btp" onclick="openAdd()">+ Add a Contact</button></div>
+        <div class="card" style="padding:22px;"><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:5px;">Import a Spreadsheet</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Upload CSV or Excel</div><div class="uz" style="padding:18px;margin-bottom:0;" onclick="document.getElementById('csvfi').click()"><div style="font-size:22px;margin-bottom:5px;">📊</div><div style="font-size:12px;font-weight:600;">Drop or click to browse</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">CSV or Excel · Column mapping coming soon</div></div><input type="file" id="csvfi" accept=".csv,.xlsx" style="display:none" onchange="handleCSV(event)"/></div>
+      </div>
+      <div class="cl"><p><strong>Warm contacts have no auto-fire timer</strong> — you decide when to send. The pipeline builds the site but won't pitch without you.</p></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- DETAIL PANEL -->
+<div class="dp" id="dpanel">
+  <div class="dph"><div><div class="dpb2" id="dpbiz">—</div><div class="dpo" id="dpown">—</div></div><button class="dpc" onclick="closePanel()">✕</button></div>
+  <div class="dpbd">
+    <div class="dps"><div class="dpsl">About This Business</div><div class="ig" id="dpinfo"></div></div>
+    <div class="dps">
+      <div class="dpsl">Their Sample Website</div>
+      <div class="sprev">
+        <div class="spb"><div class="dr"></div><div class="dy"></div><div class="dg"></div><span class="su2" id="dpurl">—</span></div>
+        <div class="sth"><div><div class="stbn" id="dptbn">—</div><div class="stct" id="dptct">—</div></div></div>
+        <div class="sab"><span id="dpsstat">Site ready</span><button class="btn btp btsm" onclick="openEditorFromPanel()">🌐 Open in Builder</button></div>
+      </div>
+    </div>
+    <div class="dps">
+      <div class="dpsl">Outreach Email</div>
+      <div class="ee">
+        <div class="eh"><div class="ef"><label>From</label><span>tricia@autosite.website</span></div><div class="ef"><label>To</label><span id="dpto">—</span></div><div class="ef"><label>Re</label><input class="si" id="dpsubj" type="text"/></div></div>
+        <div class="ebw"><div style="display:flex;justify-content:space-between;align-items:center;padding:7px 13px 0;"><span style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Your message</span><button class="btn btg btxs" onclick="autoGenEmail()" title="Auto-fill with smart pitch">✨ Auto-write</button></div><textarea class="ebody" id="dpbody" oninput="updCC()" placeholder="Write your pitch here... keep it short and personal. The site preview card is added automatically below your message."></textarea></div>
+        <div class="ef2"><span class="cc" id="dpcc">0 characters</span><div style="display:flex;gap:7px;"><button class="btn btg btsm" onclick="rewrite()">↺ Rewrite</button><button class="btn btgr btsm" onclick="sendPanel()">Send →</button></div></div>
+        <div style="margin:4px 13px 10px;padding:10px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:4px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:6px">📱 MMS Preview Link</div>
+          <input id="dp-pitch-url" readonly onclick="this.select()" style="width:100%;font-size:10px;padding:5px 7px;border:1px solid #e0d9d0;border-radius:3px;background:#fff;color:#666;font-family:monospace;margin-bottom:7px" value="start.autosite.website?...">
+          <div style="display:flex;gap:7px">
+            <button class="btn bts btsm" style="flex:1;justify-content:center;font-size:10px" onclick="copyPanelURL()">📋 Copy Link</button>
+            <button class="btn btp btsm" style="flex:1;justify-content:center;font-size:10px" onclick="sendPanelSMS()">💬 Text Customer</button>
+          </div>
+          <div style="font-size:9px;color:#9a9189;margin-top:5px;line-height:1.4">Customer sees their city + site pre-filled. Hits Launch in 30 sec.</div>
+        </div>
+        <div style="display:flex;gap:6px;padding:8px 13px;border-top:1px solid var(--border);">
+          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markReplied()">✉️ Mark Replied</button>
+          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markCustomer()">⭐ Mark Customer</button>
+          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markPassed()">✗ Pass</button>
+        </div>
+      </div>
+    </div>
+    <div class="dps" id="dpSnoozeWrap">
+      <div class="dpsl">Need More Time?</div>
+      <button class="btn bto btsm" onclick="togSnooze('dpSF')">⏸ Snooze This Lead</button>
+      <div class="sp" id="dpSF">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How long?</div>
+        <div class="sos"><div class="so" onclick="selSn(this,24)"><span class="sn2">24h</span>One day</div><div class="so" onclick="selSn(this,48)"><span class="sn2">48h</span>Two days</div><div class="so" onclick="selSn(this,72)"><span class="sn2">72h</span>Three days</div><div class="so" onclick="selSn(this,'manual')"><span class="sn2">✋</span>Manual</div></div>
+        <div class="sreason"><label>Why?</label><select class="ssel" id="dpSR" onchange="chkVac(this,'dpVN')"><option value="">— Select reason —</option><option value="client-reviewing">Client reviewing</option><option value="waiting-assets">Waiting on assets</option><option value="client-vacation">Client on vacation / out of pocket</option><option value="needs-customization">Needs more customization</option><option value="other">Other</option></select><div class="vn" id="dpVN">⏸ Vacation gives an extra snooze credit.</div></div>
+        <div style="margin-top:10px;display:flex;gap:7px;"><button class="btn bto btsm" onclick="confirmPS()">Confirm</button><button class="btn btg btsm" onclick="togSnooze('dpSF')">Cancel</button></div>
+      </div>
+    </div>
+    <div class="dps">
+        <!-- YES FLOW -->
+        <div class="dps" id="yesFlow" style="display:none;">
+          <div class="dpsl" style="color:var(--green);">🎉 They Said Yes!</div>
+          <div style="background:var(--surface3);border:1px solid var(--border);padding:14px 16px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Choose how to move forward:</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <label style="font-size:11px;color:var(--muted2);white-space:nowrap;">Monthly price ($)</label>
+              <input type="number" id="yesPrice" value="99" min="49" max="999" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:inherit;font-size:14px;font-weight:600;padding:7px 10px;width:90px;outline:none;"/>
+              <span style="font-size:11px;color:var(--muted)">/mo</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <button class="btn btgr" onclick="sendPaymentLink()" style="padding:10px;font-size:12px;">💳 Send Payment Link</button>
+              <button class="btn btp" onclick="sendCallLink()" style="padding:10px;font-size:12px;">📞 Schedule a Call</button>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;">Payment link sends Stripe checkout + intake form.<br>Schedule a call sends Tricia's direct number.</div>
+          </div>
+        </div>
+        <div class="dpsl">Activity</div><div class="al" id="dpact"></div></div>
+  </div>
+</div>
+<div class="pov" id="pov" onclick="closePanel()"></div>
+
+<!-- EDITOR MODAL -->
+<div class="mo" id="edModal">
+  <div class="em">
+    <div class="emh"><div><div class="emt" id="emtitle">Edit Site</div><div class="ems">Changes preview live — approve when happy</div></div><button class="emcl" onclick="closeEd()">✕</button></div>
+    <div class="embd">
+      <div class="emc">
+        <div><div class="esl">Logo</div><div class="lz" id="lz" onclick="document.getElementById('lfi').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor=''" ondrop="dropLogo(event)"><div class="lpw" id="lpw"><img id="lpi" alt="logo"/></div><div id="lph"><div style="font-size:22px;margin-bottom:5px;">🖼️</div><div style="font-size:11px;color:var(--muted);">Drop or click to upload</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">PNG or JPG</div></div></div><input type="file" id="lfi" accept="image/*" style="display:none" onchange="upLogo(event)"/><button class="btn btg btxs" style="margin-top:7px;width:100%;" onclick="rmLogo()">Remove Logo</button></div>
+        <div><div class="esl">Color Scheme</div><div class="pg" id="pg"><div class="cp sel" data-p="#1a3a4a" data-a="#c9a84c" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#1a3a4a;"></div><div class="cpsw" style="background:#c9a84c;"></div></div><div class="cpn">Navy & Gold</div></div><div class="cp" data-p="#2d4a3e" data-a="#7bc47f" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#2d4a3e;"></div><div class="cpsw" style="background:#7bc47f;"></div></div><div class="cpn">Forest & Sage</div></div><div class="cp" data-p="#3d2b1f" data-a="#d4956a" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#3d2b1f;"></div><div class="cpsw" style="background:#d4956a;"></div></div><div class="cpn">Warm & Earthy</div></div><div class="cp" data-p="#2c2c54" data-a="#e94560" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#2c2c54;"></div><div class="cpsw" style="background:#e94560;"></div></div><div class="cpn">Deep & Bold</div></div><div class="cp" data-p="#1a1a2e" data-a="#f5a623" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#1a1a2e;"></div><div class="cpsw" style="background:#f5a623;"></div></div><div class="cpn">Dark & Sharp</div></div><div class="cp" data-p="#4a4560" data-a="#ffd700" onclick="pickP(this)"><div class="cps"><div class="cpsw" style="background:#4a4560;"></div><div class="cpsw" style="background:#ffd700;"></div></div><div class="cpn">Slate & Yellow</div></div></div><div class="cpick"><div><label>Main</label><input type="color" id="cp1" value="#1a3a4a" oninput="rfPrev()"/></div><div><label>Accent</label><input type="color" id="cp2" value="#c9a84c" oninput="rfPrev()"/></div></div></div>
+        <div>
+          <div class="esl">Site Text</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Headline</label><input id="et_headline" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="e.g. Welcome to Joe's Plumbing" oninput="rfPrev()"/></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Tagline</label><input id="et_tagline" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="e.g. Serving the area since 1998" oninput="rfPrev()"/></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Services (one per line)</label><textarea id="et_services" class="fi" style="font-size:12px;padding:7px 10px;min-height:70px;resize:vertical;" placeholder="Plumbing Repairs&#10;Water Heaters&#10;Emergency Service" oninput="rfPrev()"></textarea></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">About blurb</label><textarea id="et_about" class="fi" style="font-size:12px;padding:7px 10px;min-height:55px;resize:vertical;" placeholder="A short line about the business..." oninput="rfPrev()"></textarea></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Phone</label><input id="et_phone" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="(740) 555-0100" oninput="rfPrev()"/></div>
+          </div>
+        </div>
+        <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--bl);display:flex;flex-direction:column;gap:7px;"><button class="btn btgr" style="width:100%;justify-content:center;" onclick="saveApprove()">✓ Save & Send This</button><button class="btn bts" style="width:100%;justify-content:center;" onclick="saveOnly()">Save — Send Later</button><button class="btn btg" style="width:100%;justify-content:center;" onclick="closeEd()">Cancel</button></div>
+      </div>
+      <div class="ep"><div class="pb2"><div class="dr"></div><div class="dy"></div><div class="dg"></div><div class="pu" id="prevU">preview</div><button class="pmb active" id="bkd" onclick="setM('desktop')">Desktop</button><button class="pmb" id="bkm" onclick="setM('mobile')">Mobile</button></div><div class="pc" id="prevC"><iframe id="prevF" style="width:100%;height:560px;" sandbox="allow-same-origin"></iframe></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="mo" id="addMo">
+  <div class="am"><button class="mcb" onclick="closeMo('addMo')">✕</button><h3>Add a Contact</h3><p>We'll look them up and build their sample website.</p>
+    <div class="fr"><div class="fg"><label>Business Name *</label><input type="text" class="fi" id="abiz" placeholder="Smith's Landscaping"/></div><div class="fg"><label>Owner's Name</label><input type="text" class="fi" id="aown" placeholder="Bob Smith"/></div></div>
+    <div class="fg"><label>Email Address *</label><input type="text" class="fi" id="aeml" placeholder="bob@smithslandscaping.com"/></div>
+    <div class="fr"><div class="fg"><label>City / Town</label><input type="text" class="fi" id="acity" placeholder="Steubenville OH"/></div><div class="fg"><label>Type of Business</label><input type="text" class="fi" id="acat" placeholder="Landscaping"/></div></div>
+    <div class="fr"><div class="fg"><label>Phone</label><input type="text" class="fi" id="aphon" placeholder="(740) 555-0100"/></div><div class="fg"><label>Address</label><input type="text" class="fi" id="aaddr" placeholder="123 Main St, Steubenville OH"/></div></div>
+    <div class="fg"><label>How You Know Them</label><input type="text" class="fi" id="anote" placeholder="Met at chamber, old client, etc."/></div>
+    <div class="mac"><button class="btn btg" onclick="closeMo('addMo')">Cancel</button><button class="btn btp" onclick="addContact()">Add & Build Their Site →</button></div>
+  </div>
+</div>
+
+<!-- SNOOZE CONFIRM MODAL -->
+<div class="mo" id="scMo"><div class="scm"><button class="mcb" onclick="closeMo('scMo')">✕</button><h3>Snooze Confirmed</h3><p id="scTxt">Lead snoozed.</p><div style="display:flex;justify-content:flex-end;"><button class="btn btp" onclick="closeMo('scMo')">Got it</button></div></div></div>
+
+<div class="toast" id="tst"><span id="tico">✓</span>&nbsp;<span id="tmsg"></span></div>
+
+<script>
+const S={contacts:[],filter:'all',search:'',curIdx:null,snHrs:null,autoMode:false,edIdx:null,edLogo:null};
+const SK='autosite_tricia_v3';
+
+function save(){
+  try{
+    const d=S.contacts.map(c=>{
+      const x=Object.assign({},c);
+      // Strip logo to prevent quota issues
+      if(x.logoUrl) delete x.logoUrl;
+      return x;
+    });
+    const json=JSON.stringify(d);
+    localStorage.setItem(SK,json);
+  }catch(e){
+    console.warn('Save failed:',e);
+    // Try saving without any large fields
+    try{
+      const d=S.contacts.map(c=>({
+        id:c.id,biz:c.biz,email:c.email,owner:c.owner,city:c.city,
+        category:c.category,status:c.status,siteText:c.siteText,
+        colors:c.colors,subject:c.subject,pitchText:c.pitchText,
+        added:c.added,lastActivity:c.lastActivity,activity:(c.activity||[]).slice(0,5)
+      }));
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e2){console.error('Save failed completely:',e2);}
+  }
+}
+function load(){try{const r=localStorage.getItem(SK);if(r)S.contacts=JSON.parse(r)}catch(e){}}
+setInterval(save,30000);
+
+function makeSite(c,p,a,logo,txt){
+  p=p||'#1a3a4a';a=a||'#c9a84c';txt=txt||{};
+  const biz=c.biz||'Your Business',cat=c.category||'Local Business',city=c.city||'Your City',own=c.owner||'',em=c.email||'';
+  const headline=txt.headline||biz;
+  const tagline=txt.tagline||(cat+' · '+city);
+  const about=txt.about||('Locally owned '+cat.toLowerCase()+' serving '+city+'. '+(own?own+' and the team are':'Our team is')+' committed to quality work. Give us a call.');
+  const phone=txt.phone||'';
+  const rawServices=txt.services||'';
+  const svcList=rawServices.trim()?rawServices.split('\n').filter(s=>s.trim()).map(s=>`<div class="cd"><div class="ic">✅</div><div class="cn">${s.trim()}</div></div>`).join(''):`<div class="cd"><div class="ic">⭐</div><div class="cn">Quality Work</div></div><div class="cd"><div class="ic">📍</div><div class="cn">Locally Owned</div></div><div class="cd"><div class="ic">💬</div><div class="cn">Fast Response</div></div><div class="cd"><div class="ic">🔧</div><div class="cn">Full Service</div></div><div class="cd"><div class="ic">✅</div><div class="cn">Guaranteed</div></div><div class="cd"><div class="ic">📅</div><div class="cn">Easy Scheduling</div></div>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${headline}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#fafaf8}.hero{background:${p};padding:56px 28px;text-align:center;position:relative}.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:${a}}.li{max-height:70px;max-width:180px;object-fit:contain;margin-bottom:16px}.bn{font-size:34px;font-weight:700;color:#fff}.ct{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:${a};margin-top:8px}.cy{font-size:12px;color:rgba(255,255,255,.4);margin-top:5px}.bs{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.ba{background:${a};color:#111;padding:12px 24px;font-size:13px;font-weight:700;text-decoration:none}.bb{border:2px solid rgba(255,255,255,.35);color:#fff;padding:12px 24px;font-size:13px;text-decoration:none}.ab2{padding:48px 28px;max-width:680px;margin:0 auto;text-align:center}.ab2 h2{font-size:26px;color:${p};margin-bottom:12px}.ab2 p{font-size:14px;color:#555;line-height:1.8}.sv{background:#f0ede8;padding:48px 28px}.sv h2{font-size:26px;color:${p};text-align:center;margin-bottom:26px}.gd{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;max-width:760px;margin:0 auto}.cd{background:#fff;padding:22px 16px;text-align:center;border-top:3px solid ${a}}.ic{font-size:22px;margin-bottom:8px}.cn{font-size:13px;font-weight:600;color:${p}}.ct2{background:${p};padding:48px 28px;text-align:center}.ct2 h2{font-size:26px;color:#fff;margin-bottom:8px}.ct2 p{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px}.rw{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.ci{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:14px 22px;color:#fff;text-decoration:none;font-size:13px;font-weight:600}ft{padding:16px;text-align:center;font-size:11px;color:#aaa;border-top:1px solid #e8e5e0}</style></head><body><div class="hero">${logo?`<img src="${logo}" class="li" alt="${headline}"/>`:`<div class="bn">${headline}</div>`}<div class="ct">${tagline}</div><div class="cy">${city}</div><div class="bs"><a href="tel:${phone}" class="ba">📞 ${phone||'Call Us'}</a><a href="sms:${phone}" class="bb">💬 Text Us</a></div></div><div class="ab2"><h2>About ${biz}</h2><p>${about}</p></div><div class="sv"><h2>What We Do</h2><div class="gd">${svcList}</div></div><div class="ct2"><h2>Get In Touch</h2><p>Ready to get started?</p><div class="rw"><a href="tel:${phone}" class="ci">📞 ${phone||'Call Now'}</a><a href="sms:${phone}" class="ci">💬 Text Us</a>${em?`<a href="mailto:${em}" class="ci">✉️ Email</a>`:''}</div></div><ft>© ${new Date().getFullYear()} ${biz} · ${city} · Built by AutoSite</ft></body></html>`;
+}
+
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+  const T={home:'Good morning, Tricia',contacts:'My Contacts',queue:'Ready to Send',inbox:'Replies',upsell:'Upsell Queue',customers:'My Customers',sites:'Their Websites',import:'Add Contacts'};
+  document.getElementById('ttl').textContent=T[id]||'AutoSite';
+}
+function goByName(id){const el=document.getElementById('ni-'+id);go(id,el);} 
+// Auto Mode now drives the real Shooter switch (Supabase, via the
+// dashboard site's control function). UI updates only after the
+// server confirms; on failure the toggle snaps back.
+const CONTROL_URL='/.netlify/functions/control';
+    const SHOOTER_TERRITORY='steubenville';
+ 
+    function applyUI(state){
+      S.autoMode = !!state.auto_mode;
+      const set=(id,on)=>{ const el=document.getElementById(id); if(el) el.checked=!!on; };
+      set('autoTgl', state.auto_mode);
+      set('mmsTgl',  state.mms_send);
+      set('emailTgl',state.email_send);
+      document.getElementById('aonNote').classList.toggle('show', !!state.auto_mode);
+      document.getElementById('apill').classList.toggle('show', !!state.auto_mode);
+      document.getElementById('acallout').style.display = state.auto_mode ? 'block' : 'none';
+    }
+ 
+    let LAST_STATE = { auto_mode:false, mms_send:true, email_send:true };
+ 
+    async function toggleSwitch(field, on){
+      const labels={auto_mode:'Master Auto Mode',mms_send:'MMS sending',email_send:'Email sending'};
+      toast('⏳','Setting '+labels[field]+' '+(on?'on':'off')+'...');
+      try{
+        const r=await fetch(CONTROL_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({territory:SHOOTER_TERRITORY,field,value:on})});
+        const d=await r.json();
+        if(!r.ok||!d.ok) throw new Error(d.error||('control '+r.status));
+        LAST_STATE[field]=on;
+        applyUI(LAST_STATE);
+        toast(on?'⚡':'✓',labels[field]+(on?' ON':' OFF'));
+      }catch(e){
+        console.error('Switch error:',e);
+        applyUI(LAST_STATE);              // snap back to last known good
+        toast('❌',"Couldn't reach the Shooter switch — unchanged");
+      }
+    }
+ 
+    async function syncSwitches(){
+      try{
+        const r=await fetch(CONTROL_URL+'?territory='+SHOOTER_TERRITORY);
+        if(!r.ok)return;
+        const d=await r.json();
+        LAST_STATE={auto_mode:!!d.auto_mode,mms_send:d.mms_send!==false,email_send:d.email_send!==false};
+        applyUI(LAST_STATE);
+      }catch(e){}
+    }
+    syncSwitches();
+function setDate(){
+  const now=new Date();
+  document.getElementById('tdate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const h=now.getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('ttl').textContent=g+', Tricia';
+}
+
+
+function markReplied(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  c.status='replied';c.lastActivity='Replied '+new Date().toLocaleDateString();
+  c.activity=c.activity||[];c.activity.unshift({text:'Marked as replied',time:'Just now',dot:'g'});
+  document.getElementById('yesFlow').style.display='block';
+  save();updStats();renderC();renderQ();toast('✉️',c.biz+' marked as replied');
+}
+
+function markCustomer(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  c.status='customer';c.lastActivity='Became customer '+new Date().toLocaleDateString();
+  c.activity=c.activity||[];c.activity.unshift({text:'Marked as customer',time:'Just now',dot:'g'});
+  document.getElementById('yesFlow').style.display='none';
+  save();updStats();renderC();renderQ();toast('⭐',c.biz+' is now a customer!');
+}
+
+function markPassed(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  c.status='passed';c.lastActivity='Passed '+new Date().toLocaleDateString();
+  c.activity=c.activity||[];c.activity.unshift({text:'Marked as passed',time:'Just now',dot:''});
+  document.getElementById('yesFlow').style.display='none';
+  save();updStats();renderC();renderQ();toast('✗',c.biz+' marked as passed');
+}
+
+function sendPaymentLink(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  const price=document.getElementById('yesPrice').value||'99';
+  const n=c.owner?c.owner.split(' ')[0]:'there';
+  const stripeLink='https://buy.stripe.com/PLACEHOLDER'; // TODO: replace with real Stripe link
+  const intakeForm='https://forms.autosite.website/intake'; // TODO: replace with real form
+  const subject=`Your AutoSite is ready to go live — ${c.biz}`;
+  const body=`Hi ${n},
+
+Great news — I'm ready to get your site live!
+
+Here's what happens next:
+
+1. Click the link below to set up your $${price}/month subscription
+2. Fill out a quick 2-minute form so I can customize your site
+3. Your site goes live within 24 hours
+
+Set up your subscription here:
+${stripeLink}
+
+Fill out your site intake form here:
+${intakeForm}
+
+Any questions, just reply to this email or give me a call.
+
+Tricia`;
+  const htmlBody=mkHtmlEmail(body,c);
+  toast('📤','Sending payment link to '+c.email+'...');
+  emailjs.send('service_5hult2p','template_fibtrap',{
+    name:n,title:subject,message:htmlBody,email:c.email,time:new Date().toLocaleString()
+  }).then(()=>{
+    c.status='replied';c.lastActivity='Payment link sent '+new Date().toLocaleDateString();
+    c.activity=c.activity||[];c.activity.unshift({text:'Payment link sent to '+c.email,time:'Just now',dot:'g'});
+    save();updStats();renderC();renderQ();toast('💳','Payment link sent to '+c.email);
+  }).catch(err=>{
+    console.error(err);toast('❌','Send failed — check console');
+  });
+}
+
+function sendCallLink(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  const price=document.getElementById('yesPrice').value||'99';
+  const n=c.owner?c.owner.split(' ')[0]:'there';
+  const phone='(740) 317-3295';
+  const subject=`Let's talk about your website — ${c.biz}`;
+  const body=`Hi ${n},
+
+I'd love to get on a quick call to walk you through everything and answer any questions you have.
+
+Just give me a call or text at ${phone} and we'll get it sorted out in 10 minutes.
+
+I can have your site live within 24 hours of our chat — starting at $${price}/month with no contracts.
+
+Looking forward to talking!
+
+Tricia
+${phone}`;
+  const htmlBody=mkHtmlEmail(body,c);
+  toast('📤','Sending call invite to '+c.email+'...');
+  emailjs.send('service_5hult2p','template_fibtrap',{
+    name:n,title:subject,message:htmlBody,email:c.email,time:new Date().toLocaleString()
+  }).then(()=>{
+    c.status='replied';c.lastActivity='Call invite sent '+new Date().toLocaleDateString();
+    c.activity=c.activity||[];c.activity.unshift({text:'Call invite sent to '+c.email,time:'Just now',dot:'b'});
+    save();updStats();renderC();renderQ();toast('📞','Call invite sent to '+c.email);
+  }).catch(err=>{
+    console.error(err);toast('❌','Send failed — check console');
+  });
+}
+function renderC(){
+  const list=S.contacts.filter(c=>{
+    const ms=S.filter==='all'||c.status===S.filter;
+    const mq=!S.search||c.biz.toLowerCase().includes(S.search)||( c.owner&&c.owner.toLowerCase().includes(S.search))||(c.city&&c.city.toLowerCase().includes(S.search));
+    return ms&&mq;
+  });
+  const tbody=document.getElementById('ctbody');
+  if(!tbody)return;
+  if(!list.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">No contacts yet — add one to get started.</td></tr>';return;}
+  const statusLabel={building:'Building',ready:'Ready',sent:'Sent',replied:'Replied',snoozed:'Snoozed',customer:'Customer',passed:'Passed'};
+  const statusClass={building:'bbl',ready:'brd',sent:'bn',replied:'bst',snoozed:'bsn',customer:'bst',passed:'bsk'};
+  tbody.innerHTML=list.map((c,i)=>{
+    const ri=S.contacts.indexOf(c);
+    const sl=statusLabel[c.status]||c.status;
+    const sc=statusClass[c.status]||'bbl';
+    return `<tr onclick="openC(${ri})">
+      <td><div class="tbz">${c.biz}</div><div class="tbs">${c.city||''}</div></td>
+      <td>${c.owner||'—'}</td>
+      <td>${c.email||'—'}</td>
+      <td>${c.category||'—'}</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+      <td>${c.lastActivity||c.added||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderQ(){
+  const ready=S.contacts.filter(c=>c.status==='ready'||c.status==='snoozed');
+  const upsell=S.contacts.filter(c=>c.upsellFlag&&c.status!=='customer');
+  const ql=document.getElementById('ql');
+  const uql=document.getElementById('uql');
+  if(ql){
+    if(!ready.length){ql.innerHTML='<div class="empty"><div class="ei">📋</div><div class="et">Queue is empty</div><div class="esu">Contacts move here once their site is built.</div></div>';
+    }else{
+      ql.innerHTML=ready.map(c=>{
+        const ri=S.contacts.indexOf(c);
+        return `<div class="qc"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="qb">${c.biz}</div><div class="qm">${c.owner||''} · ${c.city||''} · ${c.category||''}</div></div><span class="badge ${c.status==='snoozed'?'bsn':'brd'}">${c.status==='snoozed'?'Snoozed':'Ready'}</span></div><div class="qa"><button class="btn btp btsm" onclick="event.stopPropagation();openC(${ri})">View & Send →</button><button class="btn btg btsm" onclick="event.stopPropagation();qSend(${ri})">Quick Send</button></div></div>`;
+      }).join('');
+    }
+  }
+  if(uql){
+    if(!upsell.length){uql.innerHTML='<div class="empty"><div class="ei">⬆️</div><div class="et">Upsell queue empty</div><div class="esu">Contacts mentioning booking, menus, or galleries land here.</div></div>';
+    }else{
+      uql.innerHTML=upsell.map(c=>{
+        const ri=S.contacts.indexOf(c);
+        return `<div class="qc"><div class="qb">${c.biz}</div><div class="qm">${c.upsellNote||'Flagged for upsell'}</div><div class="qa"><button class="btn btp btsm" onclick="event.stopPropagation();openC(${ri})">Review →</button></div></div>`;
+      }).join('');
+    }
+  }
+}
+
+function updStats(){
+  const C=S.contacts;
+  document.getElementById('stot').textContent=C.length;
+  document.getElementById('srdy').textContent=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
+  document.getElementById('srep').textContent=C.filter(c=>c.status==='replied').length;
+  document.getElementById('scust').textContent=C.filter(c=>c.status==='customer').length;
+  document.getElementById('bc').textContent=C.length;
+  document.getElementById('bq').textContent=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
+  document.getElementById('bi').textContent=C.filter(c=>c.status==='replied').length;
+  document.getElementById('bu').textContent=C.filter(c=>c.upsellFlag).length;
+}
+
+function mkEmail(c){
+  var n = c.owner ? c.owner.split(' ')[0] : 'there';
+  var url = buildPitchURL(c);
+  return 'Hi ' + n + ',\n\nI\'m Tricia, and I help local businesses in the ' + (c.city||'area') + ' get a professional website up fast — usually within 24 hours.\n\nI put together a free sample website for ' + c.biz + '. No cost, no commitment — I just wanted to show you what it could look like.\n\nClick the button in this email to see your site. Takes about 30 seconds to load and it\'s built around your business.\n\nIf you like it, you can launch it right from there for $29.99/month. If not, no worries at all.\n\nWould love to hear what you think!\n\nTricia\ntricia@autosite.website';
+}
+
+function mkHtmlEmail(plainText, c){
+  var primaryColor = (c.colors && c.colors.primary) || '#1a1a2e';
+  var accentColor  = (c.colors && c.colors.accent)  || '#c9a84c';
+  var t = c.siteText || {};
+  var headline = t.headline || c.biz;
+  var tagline  = t.tagline  || (c.category || 'Local Business');
+  var city     = c.city     || 'your area';
+  var pitchURL = buildPitchURL(c);
+
+  // City hero photo via Pixabay (same key as builder)
+  var cityClean = city.replace(/,.*$/, '').trim();
+  var heroImg = 'https://pixabay.com/api/?key=55978758-91039875822fc6ce5299ef195&q=' + encodeURIComponent(cityClean + ' skyline cityscape') + '&image_type=photo&orientation=horizontal&per_page=3&safesearch=true';
+  // Use a reliable fallback city image for email (can't do async in email)
+  // We'll use a direct picsum with city seed for email reliability
+  var citySeed = cityClean.toLowerCase().replace(/[^a-z]/g, '').slice(0, 10) || 'city';
+  var heroImgUrl = 'https://picsum.photos/seed/' + citySeed + '/600/280';
+
+  // Services grid
+  var rawServices = t.services || '';
+  var svcItems = '';
+  if (rawServices.trim()) {
+    svcItems = rawServices.split('\n').filter(function(s){ return s.trim(); }).slice(0, 6).map(function(s){
+      return '<td style="width:33%;padding:10px 8px;text-align:center;vertical-align:top;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">' + s.trim() + '</div></td>';
+    }).join('');
+  } else {
+    svcItems = '<td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Quality Work</div></td><td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Locally Owned</div></td><td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Fast Response</div></td>';
+  }
+
+  // Message paragraphs
+  var msgHtml = plainText.split('\n').filter(function(l){ return l.trim(); }).map(function(l){
+    return '<p style="margin:0 0 12px;font-size:15px;color:#333;line-height:1.75;">' + l + '</p>';
+  }).join('');
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f5f5f0;font-family:Georgia,serif;">'
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;"><tr><td align="center">'
+    + '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">'
+
+    // Hero city photo
+    + '<tr><td style="padding:0;line-height:0;">'
+    + '<img src="' + heroImgUrl + '" width="600" style="width:100%;max-width:600px;height:auto;display:block;" alt="' + cityClean + '">'
+    + '</td></tr>'
+
+    // Business name overlay bar
+    + '<tr><td style="background:' + primaryColor + ';padding:20px 28px;text-align:center;">'
+    + '<div style="font-size:28px;font-weight:700;color:#ffffff;margin-bottom:6px;">' + headline + '</div>'
+    + '<div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:' + accentColor + ';">' + tagline + ' &nbsp;&middot;&nbsp; ' + city + '</div>'
+    + '</td></tr>'
+
+    // Big CTA button
+    + '<tr><td style="background:#ffffff;padding:28px 36px;text-align:center;border-bottom:3px solid ' + accentColor + ';">'
+    + '<p style="margin:0 0 20px;font-size:16px;color:#333;line-height:1.7;">We built a free website for <strong>' + c.biz + '</strong>. Click below to see it — takes about 30 seconds to load.</p>'
+    + '<a href="' + pitchURL + '" style="display:inline-block;background:' + accentColor + ';color:#111111;padding:16px 40px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:1px;border-radius:3px;">&#128064; View Your Website &rarr;</a>'
+    + '<p style="margin:16px 0 0;font-size:11px;color:#aaa;">If you like it, you can launch it for $29.99/mo right from there. No pressure.</p>'
+    + '</td></tr>'
+
+    // Message body
+    + '<tr><td style="background:#ffffff;padding:24px 36px 8px;">' + msgHtml + '</td></tr>'
+
+    // Services strip
+    + '<tr><td style="background:#f8f6f2;padding:14px 12px;border-top:1px solid #e8e5e0;">'
+    + '<table width="100%" cellpadding="0" cellspacing="0"><tr>' + svcItems + '</tr></table>'
+    + '</td></tr>'
+
+    // Signature
+    + '<tr><td style="background:#ffffff;padding:20px 36px 24px;border-top:1px solid #f0ede8;">'
+    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Tricia Maple-Damewood<br>'
+    + '<span style="color:#888;font-size:12px;">tricia@autosite.website</span></p>'
+    + '</td></tr>'
+
+    // Footer
+    + '<tr><td style="padding:14px 36px;text-align:center;">'
+    + '<p style="margin:0;font-size:10px;color:#aaa;line-height:1.6;">This is a free sample site built for ' + c.biz + '. To opt out, reply with "no thanks."</p>'
+    + '</td></tr>'
+
+    + '</table></td></tr></table></body></html>';
+}
+
+
+function autoGenEmail(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  document.getElementById('dpbody').value=mkEmail(c);
+  updCC();
+}
+
+
+function sendAll(){
+  const r=S.contacts.filter(c=>c.status==='ready'&&c.email);
+  if(!r.length){toast('⚠️','Nothing ready to send');return;}
+  toast('📤','Sending '+r.length+' emails...');
+  let sent=0,failed=0;
+  const done=()=>{save();updStats();renderC();renderQ();toast(failed?'⚠️':'✅',sent+' sent'+(failed?' · '+failed+' failed':''));};
+  r.forEach((c,i)=>{
+    setTimeout(()=>{
+      const n=c.owner?c.owner.split(' ')[0]:'there';
+      const htmlBody=mkHtmlEmail(mkEmail(c),c);
+      emailjs.send('service_5hult2p','template_fibtrap',{
+        name:n,title:`I built a free website for ${c.biz}`,message:htmlBody,email:c.email,time:new Date().toLocaleString()
+      }).then(()=>{
+        c.status='sent';c.lastActivity='Sent today';c.activity=c.activity||[];c.activity.unshift({text:'Email sent to '+c.email,time:'Just now',dot:'b'});
+        sent++;if(sent+failed===r.length)done();
+      }).catch(()=>{failed++;if(sent+failed===r.length)done();});
+    },i*600);
+  });
+}
+
+function qSend(idx){
+  const c=S.contacts[idx];
+  if(!c.email){toast('⚠️','No email address for '+c.biz);return;}
+  const subj=c.subject||`I built a free website for ${c.biz}`;
+  // Use whatever is in the textarea if panel is open, else fall back to auto-gen
+  const taEl=document.getElementById('dpbody');
+  const plainText=(taEl&&taEl.value.trim())?taEl.value.trim():mkEmail(c);
+  const htmlBody=mkHtmlEmail(plainText,c);
+  const n=c.owner?c.owner.split(' ')[0]:'there';
+  toast('📤','Sending to '+c.email+'...');
+  emailjs.send('service_5hult2p','template_fibtrap',{
+    name:n,title:subj,message:htmlBody,email:c.email,time:new Date().toLocaleString()
+  }).then(()=>{
+    c.status='sent';c.lastActivity='Sent '+new Date().toLocaleDateString();
+    c.activity=c.activity||[];c.activity.unshift({text:'Email sent to '+c.email,time:'Just now',dot:'b'});
+    save();updStats();renderC();renderQ();toast('✅','Sent to '+c.email);
+  }).catch(err=>{
+    console.error('EmailJS error:',err);
+    toast('❌','Send failed — check console');
+  });
+}
+function skipL(idx){S.contacts[idx].status='skip';save();updStats();renderC();renderQ();toast('⏭','Skipped');}
+// ── BUILD PREVIEW PITCH URL ──
+function buildPitchURL(c) {
+  var base = 'https://start.autosite.website';
+  var params = [];
+  if (c.biz)      params.push('biz='      + encodeURIComponent(c.biz));
+  if (c.phone)    params.push('phone='    + encodeURIComponent(c.phone));
+  if (c.city)     params.push('city='     + encodeURIComponent(c.city));
+  if (c.address)  params.push('addr='     + encodeURIComponent(c.address));
+  if (c.hours)    params.push('hours='    + encodeURIComponent(c.hours));
+  if (c.category) params.push('cat='      + encodeURIComponent(c.category));
+  if (c.tagline)  params.push('tagline='  + encodeURIComponent(c.tagline));
+  if (c.ig)       params.push('ig='       + encodeURIComponent(c.ig));
+  if (c.fb)       params.push('fb='       + encodeURIComponent(c.fb));
+  var svcs = (c.siteText && c.siteText.services) ? c.siteText.services : (c.services || '');
+  if (svcs) params.push('services=' + encodeURIComponent(svcs.split('\n').join('|')));
+  if (c.reviews) params.push('reviews=' + encodeURIComponent(c.reviews.split('\n').join('|')));
+  return base + '?' + params.join('&');
+}
+
+function copyPitchURL(idx) {
+  var c = S.contacts[idx];
+  var url = buildPitchURL(c);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      toast('📋', 'Preview link copied — paste into MMS!');
+      c.activity = c.activity || [];
+      c.activity.unshift({text: 'Preview link copied for MMS', time: 'Just now', dot: 'b'});
+      save(); renderC();
+    });
+  } else {
+    prompt('Copy this preview link:', url);
+  }
+}
+
+function sendPitchSMS(idx) {
+  var c = S.contacts[idx];
+  var url = buildPitchURL(c);
+  var name = c.owner ? c.owner.split(' ')[0] : 'there';
+  var msg = 'Hey ' + name + '! I built a free website for ' + c.biz + ' — check it out and launch it in 2 min: ' + url;
+  var phone = (c.phone || '').split('').filter(function(ch){ return ch >= '0' && ch <= '9'; }).join('');
+  if (phone) {
+    window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
+  } else {
+    if (navigator.clipboard) navigator.clipboard.writeText(msg);
+    toast('📋', 'No phone on file — message copied!');
+  }
+  c.activity = c.activity || [];
+  c.activity.unshift({text: 'Preview link sent via SMS', time: 'Just now', dot: 'g'});
+  c.status = 'sent';
+  save(); updStats(); renderC(); renderQ();
+}
+
+function copyPanelURL() {
+  if (S.curIdx === null) return;
+  copyPitchURL(S.curIdx);
+}
+
+function sendPanelSMS() {
+  if (S.curIdx === null) return;
+  sendPitchSMS(S.curIdx);
+  closePanel();
+}
+
+
+function openC(idx){
+  const c=S.contacts[idx];if(!c)return;
+  S.curIdx=idx;
+  document.getElementById('dpbiz').textContent=c.biz;
+  document.getElementById('dpown').textContent=c.owner||'—';
+  document.getElementById('dpurl').textContent=c.biz.toLowerCase().replace(/[^a-z0-9]/g,'-')+'.autosite.website';
+  document.getElementById('dptbn').textContent=c.biz;
+  document.getElementById('dptct').textContent=c.category||'Local Business';
+  document.getElementById('dpto').textContent=c.email||'—';
+  document.getElementById('dpsubj').value=c.subject||`I built a free website for ${c.biz}`;
+  document.getElementById('dpbody').value=c.pitchText||mkEmail(c);
+  updCC();c.touched=true;
+  document.getElementById('dpinfo').innerHTML=`<div class="ii"><label>Email</label><span>${c.email||'—'}</span></div><div class="ii"><label>Category</label><span>${c.category||'—'}</span></div><div class="ii"><label>City</label><span>${c.city||'—'}</span></div><div class="ii"><label>Status</label><span>${c.status||'New'}</span></div><div class="ii"><label>Snoozes</label><span>${c.snoozeCount||0}/${c.vacSnooze?3:2}</span></div><div class="ii"><label>Added</label><span>${c.added||'Today'}</span></div>`;
+  document.getElementById('dpact').innerHTML=(c.activity||[{text:'Contact added',time:'Just now',dot:''}]).map(a=>`<div class="ai"><div class="ad ${a.dot||''}"></div><div><div class="at">${a.text}</div><div class="atm">${a.time}</div></div></div>`).join('');
+  document.getElementById('dpSnoozeWrap').style.display=c.isManual?'none':'block';
+  document.getElementById('yesFlow').style.display=c.status==='replied'?'block':'none';
+  var pitchURL = buildPitchURL(c);
+  var urlEl = document.getElementById('dp-pitch-url');
+  if (urlEl) urlEl.value = pitchURL;
+  document.getElementById('dpanel').classList.add('open');
+  document.getElementById('pov').style.display='block';
+}
+function closePanel(){document.getElementById('dpanel').classList.remove('open');document.getElementById('pov').style.display='none';S.curIdx=null;}
+function updCC(){const len=document.getElementById('dpbody').value.length;document.getElementById('dpcc').textContent=len+' chars — site preview card added automatically';}
+function rewrite(){if(S.curIdx===null)return;document.getElementById('dpbody').value=mkEmail(S.contacts[S.curIdx]);updCC();toast('✓','Email rewritten');}
+function sendPanel(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx];
+  // Save the current textarea text and subject to the contact
+  c.pitchText=document.getElementById('dpbody').value.trim();
+  c.subject=document.getElementById('dpsubj').value.trim();
+  save();
+  qSend(S.curIdx);
+  closePanel();
+}
+function openEditorFromPanel(){
+  if(S.curIdx===null)return;
+  var c = S.contacts[S.curIdx];
+  var url = buildPitchURL(c);
+  window.open(url, '_blank');
+  toast('🌐', 'Opening builder for ' + c.biz + ' in new tab');
+}
+function togSnooze(id){document.getElementById(id).classList.toggle('open');}
+function selSn(el,h){el.closest('.sos').querySelectorAll('.so').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');S.snHrs=h;}
+function confirmPS(){
+  if(S.curIdx===null)return;
+  const c=S.contacts[S.curIdx],r=document.getElementById('dpSR').value;
+  if(!S.snHrs||!r){toast('⚠️','Pick duration and reason');return;}
+  const max=c.vacSnooze?3:2;if((c.snoozeCount||0)>=max){toast('⚠️','No credits left');return;}
+  c.snoozeCount=(c.snoozeCount||0)+1;c.snoozeReason=r.replace(/-/g,' ');
+  if(r==='client-vacation')c.vacSnooze=true;
+  c.status='snoozed';if(S.snHrs==='manual')c.manualHold=true;else c.snoozeUntil=Date.now()+S.snHrs*3600000;
+  c.activity=c.activity||[];c.activity.unshift({text:'Snoozed — '+c.snoozeReason,time:'Just now',dot:'o'});
+  document.getElementById('scTxt').textContent=S.snHrs==='manual'?`${c.biz} marked as manual hold.`:`${c.biz} snoozed ${S.snHrs}h. Reason: ${c.snoozeReason}.`;
+  closePanel();closeMo('scMo');document.getElementById('scMo').classList.add('open');
+  save();updStats();renderC();renderQ();
+}
+
+function openEd(idx){
+  var c = S.contacts[idx];
+  if(!c)return;
+  S.edIdx = idx;
+  var url = buildPitchURL(c);
+  window.open(url, '_blank');
+  toast('🌐', 'Opening builder for ' + c.biz + ' in new tab');
+}
+function closeEd(){document.getElementById('edModal').classList.remove('open');}
+function rfPrev(){
+  if(S.edIdx===null)return;
+  const c=S.contacts[S.edIdx];if(!c)return;
+  const txt={
+    headline:document.getElementById('et_headline').value,
+    tagline:document.getElementById('et_tagline').value,
+    services:document.getElementById('et_services').value,
+    about:document.getElementById('et_about').value,
+    phone:document.getElementById('et_phone').value
+  };
+  document.getElementById('prevF').srcdoc=makeSite(c,document.getElementById('cp1').value,document.getElementById('cp2').value,S.edLogo,txt);
+  // Auto-save text to contact on every keystroke so first field doesn't lose data
+  c.siteText=txt;
+  save();
+}
+function setM(m){
+  const f=document.getElementById('prevF'),d=document.getElementById('bkd'),mb=document.getElementById('bkm');
+  if(m==='mobile'){f.style.width='390px';f.style.height='844px';mb.classList.add('active');d.classList.remove('active');}
+  else{f.style.width='100%';f.style.height='560px';d.classList.add('active');mb.classList.remove('active');}
+}
+function pickP(el){document.querySelectorAll('.cp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');document.getElementById('cp1').value=el.dataset.p;document.getElementById('cp2').value=el.dataset.a;rfPrev();}
+function upLogo(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{S.edLogo=ev.target.result;document.getElementById('lpi').src=ev.target.result;document.getElementById('lpw').style.display='block';document.getElementById('lph').style.display='none';rfPrev();};r.readAsDataURL(f);
+}
+function dropLogo(e){e.preventDefault();document.getElementById('lz').style.borderColor='';const f=e.dataTransfer.files[0];if(f)upLogo({target:{files:[f]}});}
+function rmLogo(){S.edLogo=null;document.getElementById('lpi').src='';document.getElementById('lpw').style.display='none';document.getElementById('lph').style.display='block';document.getElementById('lfi').value='';rfPrev();}
+function saveApprove(){
+  if(S.edIdx===null)return;
+  const idx=S.edIdx;
+  const c=S.contacts[idx];
+  // Save all customizations to contact FIRST
+  c.colors={primary:document.getElementById('cp1').value,accent:document.getElementById('cp2').value};
+  c.logoUrl=S.edLogo;
+  c.siteText={
+    headline:document.getElementById('et_headline').value,
+    tagline:document.getElementById('et_tagline').value,
+    services:document.getElementById('et_services').value,
+    about:document.getElementById('et_about').value,
+    phone:document.getElementById('et_phone').value
+  };
+  // Save to localStorage immediately
+  save();
+  // Set status
+  c.status='sent';c.lastActivity='Sent '+new Date().toLocaleDateString();
+  c.activity=c.activity||[];c.activity.unshift({text:'Site customized and sent to '+c.email,time:'Just now',dot:'g'});
+  // Close editor
+  closeEd();
+  // Send - pass contact directly with siteText already set
+  S.curIdx=idx;
+  const taEl=document.getElementById('dpbody');
+  if(taEl&&!taEl.value.trim())taEl.value=mkEmail(c);
+  qSend(idx);
+  save();updStats();renderC();renderQ();
+  toast('🚀',c.biz+' — saved and sent!');
+}
+function saveOnly(){
+  if(S.edIdx===null)return;
+  const c=S.contacts[S.edIdx];
+  c.colors={primary:document.getElementById('cp1').value,accent:document.getElementById('cp2').value};
+  c.logoUrl=S.edLogo;
+  c.siteText={
+    headline:document.getElementById('et_headline').value,
+    tagline:document.getElementById('et_tagline').value,
+    services:document.getElementById('et_services').value,
+    about:document.getElementById('et_about').value,
+    phone:document.getElementById('et_phone').value
+  };
+  c.touched=true;
+  c.activity=c.activity||[];c.activity.unshift({text:'Site text & colors updated',time:'Just now',dot:'o'});
+  closeEd();
+  save();
+  renderC();renderQ();
+  // Update panel site preview if panel is open for this contact
+  if(S.curIdx===S.edIdx){
+    document.getElementById('dptbn').textContent=c.siteText.headline||c.biz;
+    document.getElementById('dptct').textContent=c.siteText.tagline||c.category||'Local Business';
+  }
+  toast('✓','Changes saved — site updated!');
+}
+
+function openAdd(){document.getElementById('addMo').classList.add('open');}
+function closeMo(id){document.getElementById(id).classList.remove('open');}
+function addContact(){
+  console.log('addContact fired');
+  const bizEl=document.getElementById('abiz');
+  const emlEl=document.getElementById('aeml');
+  console.log('biz el:', bizEl, 'eml el:', emlEl);
+  const biz=bizEl?bizEl.value.trim():'';
+  const email=emlEl?emlEl.value.trim():'';
+  console.log('biz:', biz, 'email:', email);
+  if(!biz){toast('⚠️','Business name is required');return;}
+  if(!email){toast('⚠️','Email address is required');return;}
+  var aphone=document.getElementById('aphon')?document.getElementById('aphon').value.trim():''; var aaddr=document.getElementById('aaddr')?document.getElementById('aaddr').value.trim():''; const c={biz,email,phone:aphone,address:aaddr,owner:document.getElementById('aown').value.trim(),city:document.getElementById('acity').value.trim()||'Your Area',category:document.getElementById('acat').value.trim()||'Local Business',note:document.getElementById('anote').value.trim(),status:'building',added:new Date().toLocaleDateString(),isManual:true,snoozeCount:0,activity:[{text:'Contact added manually',time:'Just now',dot:''}]};
+  console.log('contact object:', c);
+  S.contacts.push(c);
+  console.log('contacts length:', S.contacts.length);
+  save();updStats();renderC();
+  closeMo('addMo');
+  ['abiz','aown','aeml','acity','acat','anote','aphon','aaddr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('✓',biz+' added — building website now');
+  setTimeout(()=>{c.status='ready';c.pitchText=mkEmail(c);c.activity.unshift({text:'Website built and ready',time:'Just now',dot:'g'});save();updStats();renderC();renderQ();toast('🌐','Website ready for '+c.biz);},2500);
+}
+function handleCSV(e){if(e.target.files[0])toast('📊',e.target.files[0].name+' received — column mapping coming soon');}
+
+function toast(icon,msg){document.getElementById('tico').textContent=icon;document.getElementById('tmsg').textContent=msg;const t=document.getElementById('tst');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+
+// ── PIPELINE PACE ──
+const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+let paceState = {
+  daily: 15,
+  offDay: 0, // Sunday default
+  mode: null, // null | 'slow' | 'push'
+  slowUntil: null,
+  pushUntil: null
+};
+
+function initPace(){
+  try{ const s=localStorage.getItem('autosite_pace'); if(s) paceState=JSON.parse(s); }catch(e){}
+  // Build day buttons
+  const row=document.getElementById('pdayRow');
+  if(row) row.innerHTML=DAYS.map((d,i)=>`<div class="pday${paceState.offDay===i?' off':''}" onclick="toggleOffDay(${i})">${d}</div>`).join('');
+  // Check if slow/push week expired
+  const now=Date.now();
+  if(paceState.mode==='slow'&&paceState.slowUntil&&now>paceState.slowUntil){paceState.mode=null;savePace();}
+  if(paceState.mode==='push'&&paceState.pushUntil&&now>paceState.pushUntil){paceState.mode=null;savePace();}
+  // Set slider
+  const sl=document.getElementById('psSlider');
+  if(sl) sl.value=paceState.daily;
+  updatePaceDisplay();
+}
+
+function savePace(){
+  try{localStorage.setItem('autosite_pace',JSON.stringify(paceState));}catch(e){}
+}
+
+function updatePace(val){
+  paceState.daily=+val;
+  // Clear mode if manually adjusted
+  if(paceState.mode==='slow'&&+val>5) paceState.mode=null;
+  if(paceState.mode==='push'&&+val<30) paceState.mode=null;
+  updatePaceDisplay();
+  savePace();
+}
+
+function updatePaceDisplay(){
+  const d=paceState.daily;
+  const activeDays=6; // 7 minus off day
+  const weekly=d*activeDays;
+  const psv=document.getElementById('psVal');
+  const pss=document.getElementById('psSub');
+  if(psv) psv.textContent=d;
+  if(pss) pss.textContent='~'+weekly+' per week · '+activeDays+' active days';
+  // Mode buttons
+  const slow=document.getElementById('pmodeSlow');
+  const push=document.getElementById('pmodePush');
+  if(slow) slow.classList.toggle('slow-on', paceState.mode==='slow');
+  if(push) push.classList.toggle('push-on', paceState.mode==='push');
+  // Week note
+  const note=document.getElementById('psWeekNote');
+  if(note){
+    if(paceState.mode==='slow') note.textContent='🧊 Slow week on';
+    else if(paceState.mode==='push') note.textContent='🔥 Push week on';
+    else note.textContent='';
+  }
+}
+
+function setSlowWeek(){
+  if(paceState.mode==='slow'){
+    // Toggle off
+    paceState.mode=null;
+    document.getElementById('psSlider').value=15;
+    paceState.daily=15;
+  } else {
+    paceState.mode='slow';
+    paceState.slowUntil=Date.now()+(7*24*3600*1000);
+    paceState.daily=5;
+    document.getElementById('psSlider').value=5;
+  }
+  updatePaceDisplay(); savePace();
+  toast(paceState.mode==='slow'?'🧊':'✓', paceState.mode==='slow'?'Slow week — 5 leads/day for 7 days':'Slow week cancelled');
+}
+
+function setPushWeek(){
+  if(paceState.mode==='push'){
+    paceState.mode=null;
+    document.getElementById('psSlider').value=15;
+    paceState.daily=15;
+  } else {
+    paceState.mode='push';
+    paceState.pushUntil=Date.now()+(7*24*3600*1000);
+    paceState.daily=30;
+    document.getElementById('psSlider').value=30;
+  }
+  updatePaceDisplay(); savePace();
+  toast(paceState.mode==='push'?'🔥':'✓', paceState.mode==='push'?'Push week — 30 leads/day for 7 days':'Push week cancelled');
+}
+
+function toggleOffDay(idx){
+  paceState.offDay=paceState.offDay===idx?-1:idx;
+  document.querySelectorAll('.pday').forEach((d,i)=>d.classList.toggle('off',i===paceState.offDay));
+  updatePaceDisplay(); savePace();
+  toast('📅', paceState.offDay>=0?DAYS[paceState.offDay]+' set as day off':'Day off cleared');
+}
+
+load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
+</script>
+
+</body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     PIPELINE VIEW — live window into the agent leads table.
+     Paste this whole block at the very BOTTOM of index.html, just BEFORE
+     the closing </body></html> (right after the enrichment block is fine).
+     It adds a "📊 Pipeline" button to the top bar that opens a full-screen
+     live view of leads moving through the stages, scoped to this dashboard's
+     territory. Read-only. Auto-refreshes every 30s while open.
+     Reuses the SUPABASE_URL + SUPABASE_KEY + TERRITORY already defined
+     in the enrichment block, so nothing else is needed.
+     ════════════════════════════════════════════════════════════════════ -->
+
+<div id="pl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,0.55);z-index:998"></div>
+<div id="pl-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#faf8f4;border:1px solid rgba(201,168,76,0.3);border-radius:8px;z-index:999;width:92%;max-width:880px;max-height:88vh;flex-direction:column;box-shadow:0 12px 50px rgba(28,26,23,0.25);overflow:hidden">
+
+  <div style="padding:18px 24px;border-bottom:1px solid rgba(28,26,23,0.08);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:#1c1a17">📊 Pipeline</div>
+      <div style="font-size:11px;color:#9a9189;margin-top:2px" id="pl-sub">Live view of leads moving through the system</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="plRefreshClick(this)" style="padding:7px 13px;background:#fff;border:1px solid rgba(28,26,23,0.12);border-radius:4px;cursor:pointer;font-family:'Lato',sans-serif;font-size:11px;font-weight:600;color:#1c1a17">↻ Refresh</button>
+      <button onclick="plClose()" style="background:none;border:none;font-size:18px;color:#9a9189;cursor:pointer;padding:2px 6px">✕</button>
+    </div>
+  </div>
+
+  <!-- Funnel cards -->
+  <div id="pl-funnel" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:16px 24px;flex-shrink:0"></div>
+
+  <!-- Filter pills -->
+  <div style="padding:0 24px 12px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0" id="pl-filters"></div>
+
+  <!-- Lead list -->
+  <div style="flex:1;overflow-y:auto;padding:0 24px 20px">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="position:sticky;top:0;background:#faf8f4">
+          <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Business</th>
+          <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Channel</th>
+          <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Stage</th>
+          <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Message</th>
+        </tr>
+      </thead>
+      <tbody id="pl-rows"></tbody>
+    </table>
+    <div id="pl-empty" style="display:none;text-align:center;padding:40px;color:#9a9189;font-size:13px">No leads yet for this territory.</div>
+    <div id="pl-loading" style="text-align:center;padding:40px;color:#9a9189;font-size:13px">Loading…</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Stage metadata: order, friendly label, color
+  var PL_STAGES = [
+    { key:'queued',        label:'Found',        color:'#9a9189' },
+    { key:'approved',      label:'Pitch written',color:'#4a7eb5' },
+    { key:'built',         label:'Site built',   color:'#4a7eb5' },
+    { key:'filmed',        label:'Screenshot',   color:'#e08040' },
+    { key:'cleared',       label:'Ready to send',color:'#c9a84c' },
+    { key:'pitched',       label:'Sent ✓',       color:'#4a9e6b' },
+  ];
+  var PL_FILTER = 'all';
+  var PL_DATA = [];
+  var PL_TIMER = null;
+
+  // Self-contained config — no longer depends on the Enricher block.
+  // territory falls back to the dashboard's TERRITORY const if present,
+  // else to the baked-in default below. SET THIS to match the dashboard.
+  var PL_SUPABASE_URL = 'https://iplzsgxwqmrnbvtafagu.supabase.co';
+  var PL_SUPABASE_KEY = 'sb_publishable_HRhE8feahlMooWeLw88XWQ_rHYPpjh9';
+  var PL_TERRITORY    = 'steubenville';  // ← set per dashboard (nashville / steubenville)
+
+  function plCfg(){
+    return {
+      url:  (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : PL_SUPABASE_URL,
+      key:  (typeof SUPABASE_KEY !== 'undefined') ? SUPABASE_KEY : PL_SUPABASE_KEY,
+      terr: (typeof TERRITORY    !== 'undefined') ? TERRITORY    : PL_TERRITORY
+    };
+  }
+
+  window.plOpen = function(){
+    document.getElementById('pl-modal').style.display='flex';
+    document.getElementById('pl-overlay').style.display='block';
+    var c = plCfg();
+    document.getElementById('pl-sub').textContent = 'Live view — '+c.terr+' territory · auto-refreshing';
+    plLoad();
+    if(PL_TIMER) clearInterval(PL_TIMER);
+    PL_TIMER = setInterval(plLoad, 30000); // auto-refresh every 30s while open
+  };
+  window.plClose = function(){
+    document.getElementById('pl-modal').style.display='none';
+    document.getElementById('pl-overlay').style.display='none';
+    if(PL_TIMER){ clearInterval(PL_TIMER); PL_TIMER=null; }
+  };
+
+  window.plLoad = async function(){
+    // Don't refresh while the user has a message panel open/editing — it would
+    // wipe an in-progress edit. Skip this cycle if any panel is expanded.
+    var anyOpen = Array.prototype.some.call(
+      document.querySelectorAll('[id^="pl-msg-"]'),
+      function(el){ return el.style.display && el.style.display!=='none'; }
+    );
+    if(anyOpen) return;
+
+    var c = plCfg();
+    var loading = document.getElementById('pl-loading');
+    var empty   = document.getElementById('pl-empty');
+    loading.style.display='block'; empty.style.display='none';
+    try{
+      var q = '/leads?territory=eq.'+encodeURIComponent(c.terr)+
+              '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,updated_at'+
+              '&order=updated_at.desc&limit=500';
+      var res = await fetch(c.url+'/rest/v1'+q, {
+        headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key }
+      });
+      var data = await res.json();
+      PL_DATA = Array.isArray(data) ? data : [];
+    }catch(e){ console.error('Pipeline load error:', e); PL_DATA=[]; }
+    loading.style.display='none';
+    plRenderFunnel();
+    plRenderFilters();
+    plRenderRows();
+  };
+
+  function plCount(statusKey){
+    return PL_DATA.filter(function(l){ return l.status===statusKey; }).length;
+  }
+
+  function plRenderFunnel(){
+    var html = PL_STAGES.map(function(s){
+      var n = plCount(s.key);
+      return '<div onclick="plSetFilter(\''+s.key+'\')" style="cursor:pointer;background:#fff;border:1px solid rgba(28,26,23,0.08);border-top:3px solid '+s.color+';padding:12px 8px;text-align:center;border-radius:3px">'
+        + '<div style="font-family:\'Playfair Display\',serif;font-size:24px;font-weight:700;color:'+s.color+';line-height:1">'+n+'</div>'
+        + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9189;margin-top:4px">'+s.label+'</div>'
+        + '</div>';
+    }).join('');
+    document.getElementById('pl-funnel').innerHTML = html;
+  }
+
+  function plRenderFilters(){
+    var pills = [{key:'all',label:'All ('+PL_DATA.length+')'}];
+    PL_STAGES.forEach(function(s){
+      var n = plCount(s.key);
+      if(n>0) pills.push({key:s.key, label:s.label+' ('+n+')'});
+    });
+    document.getElementById('pl-filters').innerHTML = pills.map(function(p){
+      var on = PL_FILTER===p.key;
+      return '<span onclick="plSetFilter(\''+p.key+'\')" style="cursor:pointer;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid '+(on?'#c9a84c':'rgba(28,26,23,0.08)')+';background:'+(on?'#c9a84c':'#fff')+';color:'+(on?'#1c1a17':'#9a9189')+'">'+p.label+'</span>';
+    }).join('');
+  }
+
+  function plStageInfo(status){
+    for(var i=0;i<PL_STAGES.length;i++){ if(PL_STAGES[i].key===status) return PL_STAGES[i]; }
+    return { key:status, label:status, color:'#9a9189' };
+  }
+
+  function plRenderRows(){
+    var rows = PL_DATA.filter(function(l){ return PL_FILTER==='all' || l.status===PL_FILTER; });
+    // sort by pipeline progress (sent first), then name
+    var order = {};
+    PL_STAGES.forEach(function(s,i){ order[s.key]=PL_STAGES.length-i; });
+    rows.sort(function(a,b){
+      var d=(order[b.status]||0)-(order[a.status]||0);
+      return d!==0?d:(a.business_name||'').localeCompare(b.business_name||'');
+    });
+    var empty = document.getElementById('pl-empty');
+    if(!rows.length){ document.getElementById('pl-rows').innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    document.getElementById('pl-rows').innerHTML = rows.map(function(l, i){
+      var s = plStageInfo(l.status);
+      var chIcon = l.channel==='mms' ? '📱 MMS' : '✉️ Email';
+      var contact = l.email || l.phone || '—';
+      var msg = (l.cold_message||'').trim();
+      var hasMsg = msg.length > 0;
+      var wc = hasMsg ? msg.split(/\s+/).length : 0;
+      var caret = hasMsg ? '<span style="color:#c9a84c;font-size:10px">▸ message ('+wc+'w)</span>' : '<span style="color:#cfc9c0;font-size:10px">no message yet</span>';
+      var safeMsg = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      var rowId = 'pl-msg-'+i;
+      var taId  = 'pl-ta-'+i;
+      var wcId  = 'pl-wc-'+i;
+      var shot = (l.screenshot_url||'').trim();
+      var shotBlock = shot
+        ? '<div style="margin:2px 0 12px"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9189;margin-bottom:5px">Screenshot they\'ll see</div>'
+            + '<a href="'+shot+'" target="_blank" rel="noopener" title="Open full size"><img src="'+shot+'" style="width:280px;max-width:100%;height:auto;max-height:340px;object-fit:cover;object-position:top;border:1px solid rgba(28,26,23,0.12);border-radius:6px;display:block" loading="lazy"></a></div>'
+        : '<div style="margin:2px 0 12px;font-size:11px;color:#cfc9c0">No screenshot yet — Filmer hasn\'t shot this one.</div>';
+      return '<tr onclick="plToggleMsg(\''+rowId+'\')" style="border-bottom:1px solid rgba(28,26,23,0.04);cursor:pointer">'
+        + '<td style="padding:10px;font-size:12px;font-weight:600;color:#1c1a17">'+(l.business_name||'—')
+          + (l.city?'<div style="font-size:10px;color:#9a9189;font-weight:400">'+l.city+'</div>':'')+'</td>'
+        + '<td style="padding:10px;font-size:11px;color:#9a9189">'+chIcon+'</td>'
+        + '<td style="padding:10px"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;background:'+s.color+'18;color:'+s.color+'">'+s.label+'</span></td>'
+        + '<td style="padding:10px;font-size:11px;color:#9a9189">'+caret+'</td>'
+        + '</tr>'
+        + '<tr id="'+rowId+'" style="display:none"><td colspan="4" style="padding:0 10px 14px" onclick="event.stopPropagation()">'
+          + shotBlock
+          + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9189;margin:2px 0 5px">Outgoing message — '+chIcon+' → '+contact+'  ·  edit and save to override</div>'
+          + '<textarea id="'+taId+'" oninput="plWC(\''+taId+'\',\''+wcId+'\')" style="width:100%;min-height:90px;border:1px solid rgba(201,168,76,0.4);border-left:3px solid '+s.color+';border-radius:4px;padding:10px 12px;font-family:inherit;font-size:12px;line-height:1.6;color:#3a3631;resize:vertical;outline:none">'+safeMsg+'</textarea>'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">'
+            + '<span id="'+wcId+'" style="font-size:10px;color:#9a9189">'+wc+' words'+(wc>70?' — over 70, consider trimming':'')+'</span>'
+            + '<div style="display:flex;gap:7px">'
+              + '<button onclick="plRevert(\''+taId+'\',this)" data-orig="'+safeMsg+'" style="padding:5px 12px;background:#fff;border:1px solid rgba(28,26,23,0.12);border-radius:4px;font-size:11px;font-weight:600;color:#9a9189;cursor:pointer">↺ Revert</button>'
+              + '<button onclick="plSaveMsg(\''+l.id+'\',\''+taId+'\',this)" style="padding:5px 14px;background:#c9a84c;border:none;border-radius:4px;font-size:11px;font-weight:600;color:#1c1a17;cursor:pointer">💾 Save</button>'
+            + '</div>'
+          + '</div>'
+          + '<div id="plstat-'+taId+'" style="display:none;font-size:11px;font-weight:600;margin-top:7px"></div>'
+        + '</td></tr>';
+    }).join('');
+  }
+
+  window.plSetFilter = function(k){ PL_FILTER=k; plRenderFilters(); plRenderRows(); };
+
+  // Manual refresh that forces a reload even if a panel is open, with feedback
+  window.plRefreshClick = async function(btn){
+    var orig = btn.textContent;
+    btn.textContent = '↻ Refreshing…'; btn.disabled = true;
+    // collapse any open panels so the forced reload can run
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="pl-msg-"]'), function(el){ el.style.display='none'; });
+    await plLoad();
+    btn.textContent = '✓ Updated'; 
+    setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 1200);
+  };
+
+  // Expand/collapse a lead's outgoing message for gut-checking before it sends
+  window.plToggleMsg = function(rowId){
+    var el = document.getElementById(rowId);
+    if(el) el.style.display = (el.style.display==='none' ? 'table-row' : 'none');
+  };
+
+  // Live word count under the editor
+  window.plWC = function(taId, wcId){
+    var ta = document.getElementById(taId);
+    var wcEl = document.getElementById(wcId);
+    if(!ta||!wcEl) return;
+    var n = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+    wcEl.textContent = n + ' words' + (n>70 ? ' — over 70, consider trimming' : '');
+    wcEl.style.color = n>70 ? '#c0504d' : '#9a9189';
+  };
+
+  // Revert the textarea to the original message
+  window.plRevert = function(taId, btn){
+    var ta = document.getElementById(taId);
+    if(ta && btn) { ta.value = btn.getAttribute('data-orig'); ta.dispatchEvent(new Event('input')); }
+  };
+
+  // Save edited message back to Supabase (overrides what the Pitcher will send).
+  // Uses the publishable key — requires an anon UPDATE policy on leads (beta only).
+  // Uses return=representation so we can detect a silent 0-row (policy-blocked) write.
+  window.plSaveMsg = async function(leadId, taId, btn){
+    var c = plCfg();
+    var ta = document.getElementById(taId);
+    if(!ta) return;
+    var newMsg = ta.value.trim();
+    var statusEl = document.getElementById('plstat-'+taId);
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    function showStatus(txt,color){ if(statusEl){ statusEl.textContent=txt; statusEl.style.color=color; statusEl.style.display='block'; } }
+    try{
+      var res = await fetch(c.url+'/rest/v1/leads?id=eq.'+encodeURIComponent(leadId), {
+        method:'PATCH',
+        headers:{
+          'apikey':c.key, 'Authorization':'Bearer '+c.key,
+          'Content-Type':'application/json', 'Prefer':'return=representation'
+        },
+        body: JSON.stringify({ cold_message: newMsg, updated_at: new Date().toISOString() })
+      });
+      var body = await res.text();
+      if(res.ok && body && body !== '[]'){
+        // real success — a row came back
+        var hit = PL_DATA.filter(function(l){ return l.id===leadId; })[0];
+        if(hit) hit.cold_message = newMsg;
+        btn.textContent='✓ Saved'; btn.style.background='#4a9e6b'; btn.style.color='#fff'; btn.disabled=false;
+        showStatus('✓ Saved to the database — this is what will send.', '#4a9e6b');
+      } else if(res.ok && body === '[]'){
+        // 200 but zero rows = anon UPDATE policy missing/blocked (silent fail)
+        btn.textContent='✗ Blocked'; btn.style.background='#c0504d'; btn.style.color='#fff'; btn.disabled=false;
+        showStatus('✗ Save blocked — database write policy missing. Run the anon-update SQL once.', '#c0504d');
+        console.warn('Save: 200 but 0 rows — run the anon UPDATE policy on leads.');
+      } else {
+        btn.textContent='✗ Failed'; btn.style.background='#c0504d'; btn.style.color='#fff'; btn.disabled=false;
+        showStatus('✗ Save failed ('+res.status+') — check console.', '#c0504d');
+        console.error('Save failed:', res.status, body);
+      }
+    }catch(e){
+      console.error('Save error:', e);
+      btn.textContent='✗ Error'; btn.disabled=false;
+      showStatus('✗ Network error — check console.', '#c0504d');
+    }
+    setTimeout(function(){ btn.textContent='💾 Save'; btn.style.background='#c9a84c'; btn.style.color='#1c1a17'; }, 2600);
+  };
+
+  // Add the "📊 Pipeline" button to the top bar (next to Enrich)
+  document.addEventListener('DOMContentLoaded', function(){
+    var navBar = document.querySelector('.tbr');
+    if(navBar && !document.getElementById('pl-nav-btn')){
+      var btn = document.createElement('button');
+      btn.id='pl-nav-btn';
+      btn.textContent='📊 Pipeline';
+      btn.onclick=plOpen;
+      btn.style='padding:8px 14px;background:none;border:none;color:#c9a84c;cursor:pointer;font-weight:600;font-family:"Lato",sans-serif;font-size:12px;margin-right:10px';
+      navBar.insertBefore(btn, navBar.firstChild);
+    }
+  });
+
+  document.getElementById('pl-overlay').addEventListener('click', plClose);
+})();
+</script>
+<!-- ════════════ END PIPELINE VIEW ════════════ -->
+
+</html>

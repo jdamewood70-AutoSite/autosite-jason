@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Territory Marketplace · AutoSite</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a0f;--surface:#0e1118;--surface2:#141823;
+  --border:#1d2230;--gold:#c9a84c;--green:#52d68a;--red:#e06a6a;
+  --text:#e8ebf2;--muted:#6b7385;--muted2:#9aa2b4;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;padding:0;}
+
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;}
+.header h1{margin:0;font-size:24px;font-weight:600;}
+.btn{padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s;}
+.btn-primary{background:var(--gold);color:#080a0f;}
+.btn-primary:hover{background:#dab55d;}
+.btn-secondary{background:var(--surface2);color:var(--muted2);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.container{max-width:1400px;margin:0 auto;padding:30px;}
+
+.filters{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;}
+.filter{display:flex;align-items:center;gap:8px;}
+.filter label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:600;}
+.filter select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:4px;cursor:pointer;}
+
+.territories-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:20px;}
+.territory-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px;transition:all .2s;}
+.territory-card:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(201,168,76,.1);}
+
+.territory-card h3{margin:0 0 8px;font-size:16px;font-weight:600;}
+.territory-location{color:var(--muted);font-size:12px;margin-bottom:12px;}
+.territory-meta{display:flex;justify-content:space-between;margin-bottom:15px;}
+.territory-price{font-size:18px;font-weight:700;color:var(--gold);}
+.territory-tier{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;}
+.territory-revenue{font-size:12px;color:var(--muted2);margin-bottom:15px;}
+.territory-status{display:inline-block;font-size:10px;padding:4px 8px;border-radius:3px;background:var(--surface2);color:var(--muted2);margin-bottom:15px;}
+.territory-status.available{background:rgba(82,214,138,.1);color:var(--green);}
+
+.territory-buttons{display:flex;gap:8px;}
+.territory-buttons .btn{flex:1;padding:8px 12px;font-size:12px;}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-bottom:30px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:20px;border-radius:6px;}
+.stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-size:28px;font-weight:700;color:var(--gold);}
+
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.loading::after{content:'...';animation:dots 1.5s infinite;}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}
+
+.empty{text-align:center;padding:40px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗺️ Territory Marketplace</h1>
+  <div>
+    <span style="font-size:14px;color:var(--muted);">Loading...</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats" id="statsContainer"></div>
+
+  <div class="filters">
+    <div class="filter">
+      <label>State</label>
+      <select id="filterState" onchange="applyFilters()">
+        <option value="">All States</option>
+        <option value="TN">Tennessee</option>
+        <option value="OH">Ohio</option>
+        <option value="CO">Colorado</option>
+        <option value="CA">California</option>
+        <option value="IL">Illinois</option>
+        <option value="NY">New York</option>
+      </select>
+    </div>
+    <div class="filter">
+      <label>Price Tier</label>
+      <select id="filterTier" onchange="applyFilters()">
+        <option value="">All Sizes</option>
+        <option value="metro">Metro ($699)</option>
+        <option value="large">Large ($399)</option>
+        <option value="mid">Mid ($199)</option>
+        <option value="small">Small ($99)</option>
+      </select>
+    </div>
+    <button class="btn btn-secondary" onclick="applyFilters()">Search</button>
+  </div>
+
+  <div id="territoriesContainer" class="territories-grid">
+    <div class="loading">Loading territories from Supabase...</div>
+  </div>
+</div>
+
+<script>
+let allTerritories = [];
+
+async function init(){
+  try {
+    console.log('🚀 Fetching territories...');
+    // Call the territories-list function with status=all to get everything
+    const response = await fetch('/.netlify/functions/territories-list?status=all');
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error('API returned ' + response.status);
+    }
+    const data = await response.json();
+    console.log('Full API response:', data);
+    console.log('Territories array:', data.territories);
+    console.log('Array length:', (data.territories || []).length);
+    
+    allTerritories = data.territories || [];
+    
+    if (allTerritories.length === 0) {
+      console.log('No territories in response');
+      document.getElementById('territoriesContainer').innerHTML = '<div class="empty">No territories available. Check back soon!</div>';
+      return;
+    }
+    
+    console.log('✓ Loaded ' + allTerritories.length + ' territories');
+    loadStats();
+    loadTerritories();
+  } catch (error) {
+    console.error('❌ Error loading territories:', error);
+    document.getElementById('territoriesContainer').innerHTML = '<div class="empty">❌ Could not load territories. Please try again.</div>';
+  }
+}
+
+function loadStats(){
+  const total = allTerritories.length;
+  const available = allTerritories.filter(t => t.status === 'available').length;
+  const revenue = allTerritories.reduce((sum, t) => sum + (t.estimated_monthly_revenue || 0), 0);
+
+  document.getElementById('statsContainer').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Territories</div>
+      <div class="stat-value">${total}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Available Now</div>
+      <div class="stat-value">${available}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Combined Monthly Revenue</div>
+      <div class="stat-value">$${revenue.toLocaleString()}</div>
+    </div>
+  `;
+}
+
+function loadTerritories(){
+  const state = document.getElementById('filterState').value;
+  const tier = document.getElementById('filterTier').value;
+  
+  let filtered = allTerritories;
+  if(state) filtered = filtered.filter(t => t.state === state);
+  if(tier) filtered = filtered.filter(t => t.price_tier === tier);
+  
+  if (filtered.length === 0) {
+    document.getElementById('territoriesContainer').innerHTML = '<div class="empty">No territories match your filters.</div>';
+    return;
+  }
+  
+  const html = filtered.map(t => `
+    <div class="territory-card">
+      <h3>${t.name}</h3>
+      <div class="territory-location">${t.city}, ${t.state}</div>
+      <div class="territory-meta">
+        <div class="territory-price">$${t.price}</div>
+        <div class="territory-tier">${t.price_tier}</div>
+      </div>
+      <div class="territory-revenue">Est. $${(t.estimated_monthly_revenue || 0).toLocaleString()}/mo</div>
+      <span class="territory-status ${t.status === 'available' ? 'available' : ''}">${t.status}</span>
+      <div class="territory-buttons">
+        <button class="btn btn-primary" onclick="claimTerritory('${t.slug}', '${t.name}', ${t.price})">Claim Now</button>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('territoriesContainer').innerHTML = html;
+}
+
+function claimTerritory(slug, name, price){
+  const email = prompt('Enter your email to claim this territory:');
+  if (!email) return;
+  
+  // Show loading
+  alert('🔄 Processing claim...');
+  
+  // Call the claim function
+  fetch('/.netlify/functions/claim-territory-stripe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      territory_slug: slug,
+      territory_name: name,
+      territory_price: price,
+      email: email,
+      operator_name: email.split('@')[0]
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      if (data.isFreeUser) {
+        alert('✅ Territory claimed for FREE!\n\n' + name + '\nYou\'re all set!');
+        // Reload marketplace
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        // Redirect to Stripe checkout
+        window.location.href = data.checkoutUrl;
+      }
+    } else {
+      alert('❌ Error: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('❌ Connection error: ' + err.message);
+  });
+}
+
+function applyFilters(){
+  loadTerritories();
+}
+
+init();
+</script>
+
+</body>
+</html>
