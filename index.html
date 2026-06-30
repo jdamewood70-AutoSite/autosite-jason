@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap" rel="stylesheet">
  <script>
     // EmailJS shim → routes every emailjs.send(...) call to Resend via our
-    // send-email Netlify function. Dashboard email now sends as Tricia.
+    // send-email Netlify function. Dashboard email now sends as Jason.
     window.emailjs = {
       init: function(){},
       send: function(_service, _template, params){
@@ -18,8 +18,8 @@
             to: params.email,
             subject: params.title,
             html: params.message,
-            from: 'Tricia Maple-Damewood <tricia@autosite.website>',
-            replyTo: 'tricia@autosite.website'
+            from: 'Jason Damewood <jason@autosite.website>',
+            replyTo: 'jason@autosite.website'
           })
         }).then(async function(r){
           var d = {};
@@ -250,8 +250,8 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
       <div class="aon" id="aonNote">⚡ Auto mode active</div>
     </div>
   <div class="su">
-    <div class="sav">T</div>
-    <div><div class="sn">Tricia Maple-Damewood</div><div class="st">Steubenville OH Territory</div></div>
+    <div class="sav">J</div>
+    <div><div class="sn">Jason Damewood</div><div class="st">Nashville TN Territory</div></div>
   </div>
   <nav class="nav">
     <div class="ns">My Work</div>
@@ -281,12 +281,12 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     <div style="font-size:9px;color:var(--muted);margin-bottom:6px;">Day off:</div>
     <div class="pdays" id="pdayRow"></div>
   </div>
-  <div class="sf">tricia@autosite.website</div>
+  <div class="sf">jason@autosite.website</div>
 </aside>
 
 <main class="main">
   <div class="tb">
-    <div class="tbt" id="ttl">Good morning, Tricia</div>
+    <div class="tbt" id="ttl">Good morning, Jason</div>
     <div class="tbr">
       <span class="tbd" id="tdate"></span>
       <div class="apill" id="apill">⚡ Auto Mode On
@@ -385,7 +385,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     <div class="dps">
       <div class="dpsl">Outreach Email</div>
       <div class="ee">
-        <div class="eh"><div class="ef"><label>From</label><span>tricia@autosite.website</span></div><div class="ef"><label>To</label><span id="dpto">—</span></div><div class="ef"><label>Re</label><input class="si" id="dpsubj" type="text"/></div></div>
+        <div class="eh"><div class="ef"><label>From</label><span>jason@autosite.website</span></div><div class="ef"><label>To</label><span id="dpto">—</span></div><div class="ef"><label>Re</label><input class="si" id="dpsubj" type="text"/></div></div>
         <div class="ebw"><div style="display:flex;justify-content:space-between;align-items:center;padding:7px 13px 0;"><span style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Your message</span><button class="btn btg btxs" onclick="autoGenEmail()" title="Auto-fill with smart pitch">✨ Auto-write</button></div><textarea class="ebody" id="dpbody" oninput="updCC()" placeholder="Write your pitch here... keep it short and personal. The site preview card is added automatically below your message."></textarea></div>
         <div class="ef2"><span class="cc" id="dpcc">0 characters</span><div style="display:flex;gap:7px;"><button class="btn btg btsm" onclick="rewrite()">↺ Rewrite</button><button class="btn btgr btsm" onclick="sendPanel()">Send →</button></div></div>
         <div style="margin:4px 13px 10px;padding:10px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:4px">
@@ -429,7 +429,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
               <button class="btn btgr" onclick="sendPaymentLink()" style="padding:10px;font-size:12px;">💳 Send Payment Link</button>
               <button class="btn btp" onclick="sendCallLink()" style="padding:10px;font-size:12px;">📞 Schedule a Call</button>
             </div>
-            <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;">Payment link sends Stripe checkout + intake form.<br>Schedule a call sends Tricia's direct number.</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;">Payment link sends Stripe checkout + intake form.<br>Schedule a call sends Jason's direct number.</div>
           </div>
         </div>
         <div class="dpsl">Activity</div><div class="al" id="dpact"></div></div>
@@ -452,7 +452,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Tagline</label><input id="et_tagline" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="e.g. Serving the area since 1998" oninput="rfPrev()"/></div>
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Services (one per line)</label><textarea id="et_services" class="fi" style="font-size:12px;padding:7px 10px;min-height:70px;resize:vertical;" placeholder="Plumbing Repairs&#10;Water Heaters&#10;Emergency Service" oninput="rfPrev()"></textarea></div>
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">About blurb</label><textarea id="et_about" class="fi" style="font-size:12px;padding:7px 10px;min-height:55px;resize:vertical;" placeholder="A short line about the business..." oninput="rfPrev()"></textarea></div>
-            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Phone</label><input id="et_phone" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="(740) 555-0100" oninput="rfPrev()"/></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Phone</label><input id="et_phone" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="(615) 555-0100" oninput="rfPrev()"/></div>
           </div>
         </div>
         <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--bl);display:flex;flex-direction:column;gap:7px;"><button class="btn btgr" style="width:100%;justify-content:center;" onclick="saveApprove()">✓ Save & Send This</button><button class="btn bts" style="width:100%;justify-content:center;" onclick="saveOnly()">Save — Send Later</button><button class="btn btg" style="width:100%;justify-content:center;" onclick="closeEd()">Cancel</button></div>
@@ -467,8 +467,8 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
   <div class="am"><button class="mcb" onclick="closeMo('addMo')">✕</button><h3>Add a Contact</h3><p>We'll look them up and build their sample website.</p>
     <div class="fr"><div class="fg"><label>Business Name *</label><input type="text" class="fi" id="abiz" placeholder="Smith's Landscaping"/></div><div class="fg"><label>Owner's Name</label><input type="text" class="fi" id="aown" placeholder="Bob Smith"/></div></div>
     <div class="fg"><label>Email Address *</label><input type="text" class="fi" id="aeml" placeholder="bob@smithslandscaping.com"/></div>
-    <div class="fr"><div class="fg"><label>City / Town</label><input type="text" class="fi" id="acity" placeholder="Steubenville OH"/></div><div class="fg"><label>Type of Business</label><input type="text" class="fi" id="acat" placeholder="Landscaping"/></div></div>
-    <div class="fr"><div class="fg"><label>Phone</label><input type="text" class="fi" id="aphon" placeholder="(740) 555-0100"/></div><div class="fg"><label>Address</label><input type="text" class="fi" id="aaddr" placeholder="123 Main St, Steubenville OH"/></div></div>
+    <div class="fr"><div class="fg"><label>City / Town</label><input type="text" class="fi" id="acity" placeholder="Nashville TN"/></div><div class="fg"><label>Type of Business</label><input type="text" class="fi" id="acat" placeholder="Landscaping"/></div></div>
+    <div class="fr"><div class="fg"><label>Phone</label><input type="text" class="fi" id="aphon" placeholder="(615) 555-0100"/></div><div class="fg"><label>Address</label><input type="text" class="fi" id="aaddr" placeholder="123 Main St, Nashville TN"/></div></div>
     <div class="fg"><label>How You Know Them</label><input type="text" class="fi" id="anote" placeholder="Met at chamber, old client, etc."/></div>
     <div class="mac"><button class="btn btg" onclick="closeMo('addMo')">Cancel</button><button class="btn btp" onclick="addContact()">Add & Build Their Site →</button></div>
   </div>
@@ -481,7 +481,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
 
 <script>
 const S={contacts:[],filter:'all',search:'',curIdx:null,snHrs:null,autoMode:false,edIdx:null,edLogo:null};
-const SK='autosite_tricia_v3';
+const SK='autosite_jason_v3';
 
 function save(){
   try{
@@ -527,7 +527,7 @@ function go(id,el){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
   if(el)el.classList.add('active');
-  const T={home:'Good morning, Tricia',contacts:'My Contacts',queue:'Ready to Send',inbox:'Replies',upsell:'Upsell Queue',customers:'My Customers',sites:'Their Websites',import:'Add Contacts'};
+  const T={home:'Good morning, Jason',contacts:'My Contacts',queue:'Ready to Send',inbox:'Replies',upsell:'Upsell Queue',customers:'My Customers',sites:'Their Websites',import:'Add Contacts'};
   document.getElementById('ttl').textContent=T[id]||'AutoSite';
 }
 function goByName(id){const el=document.getElementById('ni-'+id);go(id,el);} 
@@ -535,7 +535,7 @@ function goByName(id){const el=document.getElementById('ni-'+id);go(id,el);}
 // dashboard site's control function). UI updates only after the
 // server confirms; on failure the toggle snaps back.
 const CONTROL_URL='/.netlify/functions/control';
-    const SHOOTER_TERRITORY='steubenville';
+    const SHOOTER_TERRITORY='nashville';
  
     function applyUI(state){
       S.autoMode = !!state.auto_mode;
@@ -582,7 +582,7 @@ function setDate(){
   const now=new Date();
   document.getElementById('tdate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const h=now.getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('ttl').textContent=g+', Tricia';
+  document.getElementById('ttl').textContent=g+', Jason';
 }
 
 
@@ -639,7 +639,7 @@ ${intakeForm}
 
 Any questions, just reply to this email or give me a call.
 
-Tricia`;
+Jason`;
   const htmlBody=mkHtmlEmail(body,c);
   toast('📤','Sending payment link to '+c.email+'...');
   emailjs.send('service_5hult2p','template_fibtrap',{
@@ -658,7 +658,7 @@ function sendCallLink(){
   const c=S.contacts[S.curIdx];
   const price=document.getElementById('yesPrice').value||'99';
   const n=c.owner?c.owner.split(' ')[0]:'there';
-  const phone='(740) 317-3295';
+  const phone='(615) 570-0540';
   const subject=`Let's talk about your website — ${c.biz}`;
   const body=`Hi ${n},
 
@@ -670,7 +670,7 @@ I can have your site live within 24 hours of our chat — starting at $${price}/
 
 Looking forward to talking!
 
-Tricia
+Jason
 ${phone}`;
   const htmlBody=mkHtmlEmail(body,c);
   toast('📤','Sending call invite to '+c.email+'...');
@@ -750,7 +750,7 @@ function updStats(){
 function mkEmail(c){
   var n = c.owner ? c.owner.split(' ')[0] : 'there';
   var url = buildPitchURL(c);
-  return 'Hi ' + n + ',\n\nI\'m Tricia, and I help local businesses in the ' + (c.city||'area') + ' get a professional website up fast — usually within 24 hours.\n\nI put together a free sample website for ' + c.biz + '. No cost, no commitment — I just wanted to show you what it could look like.\n\nClick the button in this email to see your site. Takes about 30 seconds to load and it\'s built around your business.\n\nIf you like it, you can launch it right from there for $29.99/month. If not, no worries at all.\n\nWould love to hear what you think!\n\nTricia\ntricia@autosite.website';
+  return 'Hi ' + n + ',\n\nI\'m Jason, and I help local businesses in the ' + (c.city||'area') + ' get a professional website up fast — usually within 24 hours.\n\nI put together a free sample website for ' + c.biz + '. No cost, no commitment — I just wanted to show you what it could look like.\n\nClick the button in this email to see your site. Takes about 30 seconds to load and it\'s built around your business.\n\nIf you like it, you can launch it right from there for $29.99/month. If not, no worries at all.\n\nWould love to hear what you think!\n\nJason\njason@autosite.website';
 }
 
 function mkHtmlEmail(plainText, c){
@@ -818,8 +818,8 @@ function mkHtmlEmail(plainText, c){
 
     // Signature
     + '<tr><td style="background:#ffffff;padding:20px 36px 24px;border-top:1px solid #f0ede8;">'
-    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Tricia Maple-Damewood<br>'
-    + '<span style="color:#888;font-size:12px;">tricia@autosite.website</span></p>'
+    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Jason Damewood<br>'
+    + '<span style="color:#888;font-size:12px;">jason@autosite.website</span></p>'
     + '</td></tr>'
 
     // Footer
@@ -1292,7 +1292,7 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
   // else to the baked-in default below. SET THIS to match the dashboard.
   var PL_SUPABASE_URL = 'https://iplzsgxwqmrnbvtafagu.supabase.co';
   var PL_SUPABASE_KEY = 'sb_publishable_HRhE8feahlMooWeLw88XWQ_rHYPpjh9';
-  var PL_TERRITORY    = 'steubenville';  // ← set per dashboard (nashville / steubenville)
+  var PL_TERRITORY    = 'nashville';  // ← set per dashboard (nashville / steubenville)
 
   function plCfg(){
     return {
