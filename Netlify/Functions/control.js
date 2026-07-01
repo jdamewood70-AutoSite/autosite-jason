@@ -56,8 +56,19 @@ exports.handler = async (event) => {
       });
       let rows = await patch.json();
 
-      // create the row if it didn't exist
+      // Only auto-create if the PATCH truly matched nothing. Guard against the
+      // silent-duplicate bug: verify with a fresh SELECT before inserting, so a
+      // transient/odd PATCH response can never spawn a second row for a territory
+      // that already has one (which made reads flip between rows unpredictably).
       if (!Array.isArray(rows) || rows.length === 0) {
+        const check = await fetch(`${sbUrl}/rest/v1/shooter_control?territory=eq.${enc(territory)}&select=territory&limit=1`, { headers: H });
+        const existing = await check.json();
+        if (Array.isArray(existing) && existing.length > 0) {
+          // Row exists after all (PATCH response was empty for some other reason,
+          // e.g. return=representation hiccup) — do NOT insert a duplicate.
+          console.error('[control] PATCH matched 0 rows but row exists on recheck — territory:', territory, 'field:', field);
+          return resp(500, { ok: false, error: 'Update did not confirm — row exists but PATCH returned empty. No change made; please retry.' });
+        }
         const seed = { territory, auto_mode: false, mms_send: true, email_send: true, daily_cap: 30, email_daily_cap: 10 };
         seed[field] = value;
         const ins = await fetch(`${sbUrl}/rest/v1/shooter_control`, {
