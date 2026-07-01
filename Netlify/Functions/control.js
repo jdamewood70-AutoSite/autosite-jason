@@ -28,7 +28,18 @@ exports.handler = async (event) => {
       const territory = (event.queryStringParameters && event.queryStringParameters.territory || 'nashville').toLowerCase();
       const r = await fetch(`${sbUrl}/rest/v1/shooter_control?territory=eq.${enc(territory)}&select=auto_mode,mms_send,email_send,daily_cap,email_daily_cap&limit=1`, { headers: H });
       const rows = await r.json();
-      const row = (Array.isArray(rows) && rows[0]) ? rows[0] : {};
+      // If Supabase rejected the request (bad key, bad project, RLS, etc.) it
+      // returns an error OBJECT, not an array — the old code silently treated
+      // that as "no row" and returned all-false defaults, masking a real
+      // auth/config failure as if the switches were simply off. Surface it instead.
+      if (!r.ok || !Array.isArray(rows)) {
+        console.error('[control] Supabase GET failed:', r.status, JSON.stringify(rows));
+        return resp(502, { ok: false, error: 'Supabase query failed — check SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY on this site', detail: rows });
+      }
+      const row = rows[0] || {};
+      if (!rows.length) {
+        console.warn('[control] No shooter_control row found for territory:', territory);
+      }
       return resp(200, {
         ok: true,
         auto_mode: !!row.auto_mode,
