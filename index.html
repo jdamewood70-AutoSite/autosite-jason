@@ -266,7 +266,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     <a class="ni" id="ni-import" onclick="go('import',this)" href="#"><span class="nic">📂</span> Add Contacts</a>
   </nav>
   <div class="pspeed">
-    <div class="pspeed-title">Pipeline Pace <span id="psWeekNote"></span></div>
+    <div class="pspeed-title">MMS Pace <span id="psWeekNote"></span></div>
     <div class="pspeed-row">
       <div>
         <div class="pspeed-val"><span id="psVal" style="color:var(--gold)">15</span><span style="font-size:13px;color:var(--muted);font-weight:400;margin-left:5px;">leads/day</span></div>
@@ -1259,6 +1259,7 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
     <table style="width:100%;border-collapse:collapse">
       <thead>
         <tr style="position:sticky;top:0;background:#faf8f4">
+          <th style="text-align:center;padding:8px 4px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08);width:36px">▲▼</th>
           <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Business</th>
           <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Channel</th>
           <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#9a9189;border-bottom:1px solid rgba(28,26,23,0.08)">Stage</th>
@@ -1332,7 +1333,7 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
     loading.style.display='block'; empty.style.display='none';
     try{
       var q = '/leads?territory=eq.'+encodeURIComponent(c.terr)+
-              '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,updated_at'+
+              '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,queue_rank,updated_at'+
               '&order=updated_at.desc&limit=500';
       var res = await fetch(c.url+'/rest/v1'+q, {
         headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key }
@@ -1380,12 +1381,16 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
 
   function plRenderRows(){
     var rows = PL_DATA.filter(function(l){ return PL_FILTER==='all' || l.status===PL_FILTER; });
-    // sort by pipeline progress (sent first), then name
+    // sort by pipeline progress (sent first), then bumped queue_rank (lower = higher priority), then name
     var order = {};
     PL_STAGES.forEach(function(s,i){ order[s.key]=PL_STAGES.length-i; });
     rows.sort(function(a,b){
       var d=(order[b.status]||0)-(order[a.status]||0);
-      return d!==0?d:(a.business_name||'').localeCompare(b.business_name||'');
+      if(d!==0) return d;
+      var ar = (a.queue_rank===null||a.queue_rank===undefined) ? Infinity : a.queue_rank;
+      var br = (b.queue_rank===null||b.queue_rank===undefined) ? Infinity : b.queue_rank;
+      if(ar!==br) return ar-br;
+      return (a.business_name||'').localeCompare(b.business_name||'');
     });
     var empty = document.getElementById('pl-empty');
     if(!rows.length){ document.getElementById('pl-rows').innerHTML=''; empty.style.display='block'; return; }
@@ -1403,18 +1408,26 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
       var taId  = 'pl-ta-'+i;
       var wcId  = 'pl-wc-'+i;
       var shot = (l.screenshot_url||'').trim();
+      var isBumped = (l.queue_rank!==null && l.queue_rank!==undefined);
       var shotBlock = shot
         ? '<div style="margin:2px 0 12px"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9189;margin-bottom:5px">Screenshot they\'ll see</div>'
             + '<a href="'+shot+'" target="_blank" rel="noopener" title="Open full size"><img src="'+shot+'" style="width:280px;max-width:100%;height:auto;max-height:340px;object-fit:cover;object-position:top;border:1px solid rgba(28,26,23,0.12);border-radius:6px;display:block" loading="lazy"></a></div>'
         : '<div style="margin:2px 0 12px;font-size:11px;color:#cfc9c0">No screenshot yet — Filmer hasn\'t shot this one.</div>';
-      return '<tr onclick="plToggleMsg(\''+rowId+'\')" style="border-bottom:1px solid rgba(28,26,23,0.04);cursor:pointer">'
-        + '<td style="padding:10px;font-size:12px;font-weight:600;color:#1c1a17">'+(l.business_name||'—')
+      var prioCell = '<td style="padding:6px 4px;text-align:center" onclick="event.stopPropagation()">'
+        + '<div style="display:flex;flex-direction:column;gap:1px;align-items:center">'
+          + '<button onclick="plBumpUp(\''+l.id+'\')" title="Move to front of its queue — processes next" style="padding:1px 6px;background:'+(isBumped?'#c9a84c':'#fff')+';border:1px solid rgba(28,26,23,0.15);border-radius:3px 3px 0 0;cursor:pointer;font-size:10px;line-height:1.4;color:'+(isBumped?'#1c1a17':'#9a9189')+'">▲</button>'
+          + '<button onclick="plBumpDown(\''+l.id+'\')" title="Clear priority — back to normal order" style="padding:1px 6px;background:#fff;border:1px solid rgba(28,26,23,0.15);border-top:none;border-radius:0 0 3px 3px;cursor:pointer;font-size:10px;line-height:1.4;color:#9a9189">▼</button>'
+        + '</div>'
+      + '</td>';
+      return '<tr onclick="plToggleMsg(\''+rowId+'\')" style="border-bottom:1px solid rgba(28,26,23,0.04);cursor:pointer'+(isBumped?';background:rgba(201,168,76,0.05)':'')+'">'
+        + prioCell
+        + '<td style="padding:10px;font-size:12px;font-weight:600;color:#1c1a17">'+(isBumped?'<span title="Prioritized — processes next" style="color:#c9a84c;margin-right:4px">★</span>':'')+(l.business_name||'—')
           + (l.city?'<div style="font-size:10px;color:#9a9189;font-weight:400">'+l.city+'</div>':'')+'</td>'
         + '<td style="padding:10px;font-size:11px;color:#9a9189">'+chIcon+'</td>'
         + '<td style="padding:10px"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;background:'+s.color+'18;color:'+s.color+'">'+s.label+'</span></td>'
         + '<td style="padding:10px;font-size:11px;color:#9a9189">'+caret+'</td>'
         + '</tr>'
-        + '<tr id="'+rowId+'" style="display:none"><td colspan="4" style="padding:0 10px 14px" onclick="event.stopPropagation()">'
+        + '<tr id="'+rowId+'" style="display:none"><td colspan="5" style="padding:0 10px 14px" onclick="event.stopPropagation()">'
           + shotBlock
           + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#9a9189;margin:2px 0 5px">Outgoing message — '+chIcon+' → '+contact+'  ·  edit and save to override</div>'
           + '<textarea id="'+taId+'" oninput="plWC(\''+taId+'\',\''+wcId+'\')" style="width:100%;min-height:90px;border:1px solid rgba(201,168,76,0.4);border-left:3px solid '+s.color+';border-radius:4px;padding:10px 12px;font-family:inherit;font-size:12px;line-height:1.6;color:#3a3631;resize:vertical;outline:none">'+safeMsg+'</textarea>'
@@ -1431,6 +1444,62 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
   }
 
   window.plSetFilter = function(k){ PL_FILTER=k; plRenderFilters(); plRenderRows(); };
+
+  // Manual refresh that forces a reload even if a panel is open, with feedback
+  window.plRefreshClick = async function(btn){
+    var orig = btn.textContent;
+    btn.textContent = '↻ Refreshing…'; btn.disabled = true;
+    // collapse any open panels so the forced reload can run
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="pl-msg-"]'), function(el){ el.style.display='none'; });
+    await plLoad();
+    btn.textContent = '✓ Updated'; 
+    setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 1200);
+  };
+
+  // Expand/collapse a lead's outgoing message for gut-checking before it sends
+  // ── PRIORITY REORDER ──
+  // ▲ bumps a lead to the front of whichever stage it's currently sitting in
+  // (queue_rank lower = processed sooner; workers now order by this first).
+  // ▼ clears the rank, returning it to normal FIFO order.
+  window.plBumpUp = async function(leadId){
+    var c = plCfg();
+    // find current minimum rank among ranked leads; go one lower so this jumps to the very front
+    var ranked = PL_DATA.filter(function(l){ return l.queue_rank!==null && l.queue_rank!==undefined; });
+    var minRank = ranked.length ? Math.min.apply(null, ranked.map(function(l){ return l.queue_rank; })) : 0;
+    var newRank = minRank - 10;
+    try{
+      var res = await fetch(c.url+'/rest/v1/leads?id=eq.'+encodeURIComponent(leadId), {
+        method:'PATCH',
+        headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+        body: JSON.stringify({ queue_rank: newRank })
+      });
+      if(res.ok){
+        var hit = PL_DATA.filter(function(l){ return l.id===leadId; })[0];
+        if(hit) hit.queue_rank = newRank;
+        plRenderRows();
+      } else {
+        console.error('Bump up failed:', res.status, await res.text());
+      }
+    }catch(e){ console.error('Bump up error:', e); }
+  };
+
+  window.plBumpDown = async function(leadId){
+    var c = plCfg();
+    try{
+      var res = await fetch(c.url+'/rest/v1/leads?id=eq.'+encodeURIComponent(leadId), {
+        method:'PATCH',
+        headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+        body: JSON.stringify({ queue_rank: null })
+      });
+      if(res.ok){
+        var hit = PL_DATA.filter(function(l){ return l.id===leadId; })[0];
+        if(hit) hit.queue_rank = null;
+        plRenderRows();
+      } else {
+        console.error('Clear priority failed:', res.status, await res.text());
+      }
+    }catch(e){ console.error('Clear priority error:', e); }
+  };
 
   // Manual refresh that forces a reload even if a panel is open, with feedback
   window.plRefreshClick = async function(btn){
