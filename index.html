@@ -18,7 +18,7 @@
             to: params.email,
             subject: params.title,
             html: params.message,
-            from: 'Jason Damewood <jason@autosite.website>',
+            from: 'Jason <jason@autosite.website>',
             replyTo: 'jason@autosite.website'
           })
         }).then(async function(r){
@@ -62,10 +62,11 @@
 .pspeed-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
 .pspeed-title span{font-size:9px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;}
 .pspeed-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
-.pspeed-val{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.pspeed-val{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#fff;line-height:1;}
 .pspeed-sub{font-size:11px;color:var(--muted);margin-top:3px;}
 input.pslider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;outline:none;margin:8px 0 12px;}
 input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;}
+input.pslider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;border:none;}
 .pspeed-modes{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
 .pmode{padding:6px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;border-radius:2px;}
 .pmode:hover{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);}
@@ -211,24 +212,6 @@ td{padding:12px 16px;font-size:12px;vertical-align:middle}
 .toast.show{transform:translateY(0);opacity:1}
 .pov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:199}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bl)}
-
-.pspeed{padding:14px 16px;border-top:1px solid rgba(255,255,255,0.06);}
-.pspeed-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
-.pspeed-title span{font-size:9px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;}
-.pspeed-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
-.pspeed-val{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:var(--text);line-height:1;}
-.pspeed-sub{font-size:11px;color:var(--muted);margin-top:3px;}
-input.pslider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;outline:none;margin:8px 0 12px;}
-input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;}
-.pspeed-modes{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
-.pmode{padding:6px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;border-radius:2px;}
-.pmode:hover{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);}
-.pmode.slow-on{background:rgba(96,165,250,0.12);border-color:#60a5fa;color:#60a5fa;}
-.pmode.push-on{background:rgba(82,214,138,0.12);border-color:#52d68a;color:#52d68a;}
-.pdays{display:flex;gap:2px;margin-top:8px;}
-.pday{flex:1;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:9px;font-weight:700;cursor:pointer;color:rgba(255,255,255,0.4);transition:all .12s;border-radius:2px;}
-.pday:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,.7);}
-.pday.off{background:rgba(239,68,68,0.12);border-color:#ef4444;color:#ef4444;}
 </style>
 </head>
 <body>
@@ -251,7 +234,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     </div>
   <div class="su">
     <div class="sav">J</div>
-    <div><div class="sn">Jason Damewood</div><div class="st">Nashville TN Territory</div></div>
+    <div><div class="sn">Jason</div><div class="st">Nashville TN Territory</div></div>
   </div>
   <nav class="nav">
     <div class="ns">My Work</div>
@@ -270,16 +253,17 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     <div class="pspeed-row">
       <div>
         <div class="pspeed-val"><span id="psVal" style="color:var(--gold)">15</span><span style="font-size:13px;color:var(--muted);font-weight:400;margin-left:5px;">leads/day</span></div>
-        <div class="pspeed-sub" id="psSub">~105 per week · 6 active days</div>
+        <div class="pspeed-sub" id="psSub">~90 per week · 6 active days</div>
       </div>
     </div>
-    <input type="range" class="pslider" id="psSlider" min="5" max="30" value="15" step="1" oninput="updatePace(this.value)"/>
+    <input type="range" class="pslider" id="psSlider" min="5" max="30" value="15" step="1" oninput="updatePace(this.value)" onchange="pushPaceField('daily_cap',+this.value)"/>
     <div class="pspeed-modes">
       <button class="pmode" id="pmodeSlow" onclick="setSlowWeek()">🧊 Slow Week</button>
       <button class="pmode" id="pmodePush" onclick="setPushWeek()">🔥 Push Week</button>
     </div>
     <div style="font-size:9px;color:var(--muted);margin-bottom:6px;">Day off:</div>
     <div class="pdays" id="pdayRow"></div>
+    <div id="psSync" style="font-size:9px;color:rgba(255,255,255,0.25);margin-top:8px;">Pace: not yet synced</div>
   </div>
   <div class="sf">jason@autosite.website</div>
 </aside>
@@ -299,8 +283,8 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
 
     <div class="page active" id="page-home">
       <div class="sr">
-        <div class="sc"><div class="slbl">Total Contacts</div><div class="sval" id="stot">0</div><div class="ssub">in your list</div></div>
-        <div class="sc"><div class="slbl">Ready to Send</div><div class="sval" id="srdy">0</div><div class="ssub">awaiting review</div></div>
+        <div class="sc"><div class="slbl">Total Contacts</div><div class="sval" id="stot">0</div><div class="ssub" id="stotSub">in your list</div></div>
+        <div class="sc"><div class="slbl">Ready to Send</div><div class="sval" id="srdy">0</div><div class="ssub" id="srdySub">awaiting review</div></div>
         <div class="sc g"><div class="slbl">Replies</div><div class="sval" id="srep">0</div><div class="ssub">need response</div></div>
         <div class="sc b"><div class="slbl">Customers</div><div class="sval" id="scust">0</div><div class="ssub">signed up</div></div>
       </div>
@@ -327,7 +311,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
         <div class="ttb"><div class="sw"><input type="text" placeholder="Search contacts..." oninput="filterC(this.value)"/></div>
           <div class="pills"><div class="pill active" onclick="filterS('all',this)">All</div><div class="pill" onclick="filterS('ready',this)">Ready</div><div class="pill" onclick="filterS('snoozed',this)">Snoozed</div><div class="pill" onclick="filterS('sent',this)">Sent</div><div class="pill" onclick="filterS('replied',this)">Replied</div><div class="pill" onclick="filterS('customer',this)">Customers</div></div>
         </div>
-        <table><thead><tr><th>Business</th><th>Category</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody id="ctb"></tbody></table>
+        <table><thead><tr><th>Business</th><th>Owner</th><th>Email</th><th>Category</th><th>Status</th><th>Last Activity</th></tr></thead><tbody id="ctbody"></tbody></table>
       </div>
     </div>
 
@@ -361,9 +345,9 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
       <div class="shd" style="margin-bottom:22px;"><div><h2>Add Contacts</h2><p>One at a time or import a spreadsheet</p></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
         <div class="card" style="padding:22px;"><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:5px;">Add One Manually</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Best for warm personal contacts</div><button class="btn btp" onclick="openAdd()">+ Add a Contact</button></div>
-        <div class="card" style="padding:22px;"><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:5px;">Import a Spreadsheet</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Upload CSV or Excel</div><div class="uz" style="padding:18px;margin-bottom:0;" onclick="document.getElementById('csvfi').click()"><div style="font-size:22px;margin-bottom:5px;">📊</div><div style="font-size:12px;font-weight:600;">Drop or click to browse</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">CSV or Excel · Column mapping coming soon</div></div><input type="file" id="csvfi" accept=".csv,.xlsx" style="display:none" onchange="handleCSV(event)"/></div>
+        <div class="card" style="padding:22px;"><div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:5px;">Import a Spreadsheet</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Upload a CSV — send it straight to the email shooter</div><div class="uz" style="padding:18px;margin-bottom:0;" onclick="document.getElementById('csvfi').click()"><div style="font-size:22px;margin-bottom:5px;">📊</div><div style="font-size:12px;font-weight:600;">Drop or click to browse</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">CSV · headers auto-mapped (email required)</div></div><input type="file" id="csvfi" accept=".csv,.txt" style="display:none" onchange="handleCSV(event)"/></div>
       </div>
-      <div class="cl"><p><strong>Warm contacts have no auto-fire timer</strong> — you decide when to send. The pipeline builds the site but won't pitch without you.</p></div>
+      <div class="cl"><p><strong>Warm contacts have no auto-fire timer</strong> — you decide when to send. Imports sent to the shooter get built and pitched automatically at your daily pace.</p></div>
     </div>
 
   </div>
@@ -398,9 +382,9 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
           <div style="font-size:9px;color:#9a9189;margin-top:5px;line-height:1.4">Customer sees their city + site pre-filled. Hits Launch in 30 sec.</div>
         </div>
         <div style="display:flex;gap:6px;padding:8px 13px;border-top:1px solid var(--border);">
-          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markReplied()">✉️ Mark Replied</button>
-          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markCustomer()">⭐ Mark Customer</button>
-          <button class="btn btsm" style="flex:1;background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:10px;" onclick="markPassed()">✗ Pass</button>
+          <button class="btn btsm" style="flex:1;background:var(--cream);border:1px solid var(--bl);color:var(--muted);font-size:10px;" onclick="markReplied()">✉️ Mark Replied</button>
+          <button class="btn btsm" style="flex:1;background:var(--cream);border:1px solid var(--bl);color:var(--muted);font-size:10px;" onclick="markCustomer()">⭐ Mark Customer</button>
+          <button class="btn btsm" style="flex:1;background:var(--cream);border:1px solid var(--bl);color:var(--muted);font-size:10px;" onclick="markPassed()">✗ Pass</button>
         </div>
       </div>
     </div>
@@ -418,11 +402,11 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
         <!-- YES FLOW -->
         <div class="dps" id="yesFlow" style="display:none;">
           <div class="dpsl" style="color:var(--green);">🎉 They Said Yes!</div>
-          <div style="background:var(--surface3);border:1px solid var(--border);padding:14px 16px;margin-bottom:12px;">
+          <div style="background:var(--cream);border:1px solid var(--border);padding:14px 16px;margin-bottom:12px;">
             <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Choose how to move forward:</div>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <label style="font-size:11px;color:var(--muted2);white-space:nowrap;">Monthly price ($)</label>
-              <input type="number" id="yesPrice" value="99" min="49" max="999" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:inherit;font-size:14px;font-weight:600;padding:7px 10px;width:90px;outline:none;"/>
+              <label style="font-size:11px;color:var(--muted);white-space:nowrap;">Monthly price ($)</label>
+              <input type="number" id="yesPrice" value="99" min="49" max="999" style="background:var(--white);border:1px solid var(--bl);color:var(--dark);font-family:inherit;font-size:14px;font-weight:600;padding:7px 10px;width:90px;outline:none;"/>
               <span style="font-size:11px;color:var(--muted)">/mo</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -452,7 +436,7 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Tagline</label><input id="et_tagline" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="e.g. Serving the area since 1998" oninput="rfPrev()"/></div>
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Services (one per line)</label><textarea id="et_services" class="fi" style="font-size:12px;padding:7px 10px;min-height:70px;resize:vertical;" placeholder="Plumbing Repairs&#10;Water Heaters&#10;Emergency Service" oninput="rfPrev()"></textarea></div>
             <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">About blurb</label><textarea id="et_about" class="fi" style="font-size:12px;padding:7px 10px;min-height:55px;resize:vertical;" placeholder="A short line about the business..." oninput="rfPrev()"></textarea></div>
-            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Phone</label><input id="et_phone" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="(615) 555-0100" oninput="rfPrev()"/></div>
+            <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Phone</label><input id="et_phone" type="text" class="fi" style="font-size:12px;padding:7px 10px;" placeholder="(740) 555-0100" oninput="rfPrev()"/></div>
           </div>
         </div>
         <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--bl);display:flex;flex-direction:column;gap:7px;"><button class="btn btgr" style="width:100%;justify-content:center;" onclick="saveApprove()">✓ Save & Send This</button><button class="btn bts" style="width:100%;justify-content:center;" onclick="saveOnly()">Save — Send Later</button><button class="btn btg" style="width:100%;justify-content:center;" onclick="closeEd()">Cancel</button></div>
@@ -468,9 +452,22 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
     <div class="fr"><div class="fg"><label>Business Name *</label><input type="text" class="fi" id="abiz" placeholder="Smith's Landscaping"/></div><div class="fg"><label>Owner's Name</label><input type="text" class="fi" id="aown" placeholder="Bob Smith"/></div></div>
     <div class="fg"><label>Email Address *</label><input type="text" class="fi" id="aeml" placeholder="bob@smithslandscaping.com"/></div>
     <div class="fr"><div class="fg"><label>City / Town</label><input type="text" class="fi" id="acity" placeholder="Nashville TN"/></div><div class="fg"><label>Type of Business</label><input type="text" class="fi" id="acat" placeholder="Landscaping"/></div></div>
-    <div class="fr"><div class="fg"><label>Phone</label><input type="text" class="fi" id="aphon" placeholder="(615) 555-0100"/></div><div class="fg"><label>Address</label><input type="text" class="fi" id="aaddr" placeholder="123 Main St, Nashville TN"/></div></div>
+    <div class="fr"><div class="fg"><label>Phone</label><input type="text" class="fi" id="aphon" placeholder="(740) 555-0100"/></div><div class="fg"><label>Address</label><input type="text" class="fi" id="aaddr" placeholder="123 Main St, Nashville TN"/></div></div>
     <div class="fg"><label>How You Know Them</label><input type="text" class="fi" id="anote" placeholder="Met at chamber, old client, etc."/></div>
     <div class="mac"><button class="btn btg" onclick="closeMo('addMo')">Cancel</button><button class="btn btp" onclick="addContact()">Add & Build Their Site →</button></div>
+  </div>
+</div>
+
+<!-- IMPORT DESTINATION MODAL -->
+<div class="mo" id="impMo">
+  <div class="am"><button class="mcb" onclick="closeMo('impMo')">✕</button><h3>Import Contacts</h3>
+    <p id="impTxt">—</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btp" style="justify-content:center;padding:12px;" onclick="importToShooter()">⚡ Send to Email Shooter — build & pitch automatically</button>
+      <button class="btn bts" style="justify-content:center;padding:12px;" onclick="importAsWarm()">🤝 Add as Warm Contacts — you send manually</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px;margin-bottom:0;line-height:1.6;">Shooter: agents build the site, write the pitch, and email at your daily pace. Warm: no auto-fire timer, waits in your list until you hit send.</p>
+    <div id="impStat" style="display:none;font-size:12px;font-weight:600;margin-top:12px;"></div>
   </div>
 </div>
 
@@ -480,8 +477,18 @@ input.pslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14
 <div class="toast" id="tst"><span id="tico">✓</span>&nbsp;<span id="tmsg"></span></div>
 
 <script>
+// ── SHARED CONFIG — one source of truth for the whole dashboard.
+// The Pipeline View block at the bottom picks these up automatically.
+const SUPABASE_URL='https://iplzsgxwqmrnbvtafagu.supabase.co';
+const SUPABASE_KEY='sb_publishable_HRhE8feahlMooWeLw88XWQ_rHYPpjh9';
+const TERRITORY='nashville';
+const CONTROL_URL='/.netlify/functions/control';
+
 const S={contacts:[],filter:'all',search:'',curIdx:null,snHrs:null,autoMode:false,edIdx:null,edLogo:null};
 const SK='autosite_jason_v3';
+
+// Live pipeline leads pulled from Supabase (the agents' truth).
+let PIPE=[];
 
 function save(){
   try{
@@ -510,6 +517,23 @@ function save(){
 function load(){try{const r=localStorage.getItem(SK);if(r)S.contacts=JSON.parse(r)}catch(e){}}
 setInterval(save,30000);
 
+function txt(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+// ── LIVE PIPELINE STATS ──
+// Pulls the leads table for this territory so the home cards and sidebar
+// badges reflect what the agents are actually doing, not just the warm list.
+async function loadPipe(){
+  try{
+    const q='/rest/v1/leads?territory=eq.'+encodeURIComponent(TERRITORY)+'&select=id,status,channel,email&limit=2000';
+    const r=await fetch(SUPABASE_URL+q,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    if(r.ok){
+      const d=await r.json();
+      if(Array.isArray(d))PIPE=d;
+    }
+  }catch(e){console.warn('Pipeline stats fetch failed:',e);}
+  updStats();
+}
+
 function makeSite(c,p,a,logo,txt){
   p=p||'#1a3a4a';a=a||'#c9a84c';txt=txt||{};
   const biz=c.biz||'Your Business',cat=c.category||'Local Business',city=c.city||'Your City',own=c.owner||'',em=c.email||'';
@@ -530,14 +554,12 @@ function go(id,el){
   const T={home:'Good morning, Jason',contacts:'My Contacts',queue:'Ready to Send',inbox:'Replies',upsell:'Upsell Queue',customers:'My Customers',sites:'Their Websites',import:'Add Contacts'};
   document.getElementById('ttl').textContent=T[id]||'AutoSite';
 }
-function goByName(id){const el=document.getElementById('ni-'+id);go(id,el);} 
-// Auto Mode now drives the real Shooter switch (Supabase, via the
+function goByName(id){const el=document.getElementById('ni-'+id);go(id,el);}
+
+// Auto Mode drives the real Shooter switch (Supabase, via the
 // dashboard site's control function). UI updates only after the
 // server confirms; on failure the toggle snaps back.
-const CONTROL_URL='/.netlify/functions/control';
-    const SHOOTER_TERRITORY='nashville';
- 
-    function applyUI(state){
+function applyUI(state){
       S.autoMode = !!state.auto_mode;
       const set=(id,on)=>{ const el=document.getElementById(id); if(el) el.checked=!!on; };
       set('autoTgl', state.auto_mode);
@@ -547,15 +569,15 @@ const CONTROL_URL='/.netlify/functions/control';
       document.getElementById('apill').classList.toggle('show', !!state.auto_mode);
       document.getElementById('acallout').style.display = state.auto_mode ? 'block' : 'none';
     }
- 
+
     let LAST_STATE = { auto_mode:false, mms_send:true, email_send:true };
- 
+
     async function toggleSwitch(field, on){
       const labels={auto_mode:'Master Auto Mode',mms_send:'MMS sending',email_send:'Email sending'};
       toast('⏳','Setting '+labels[field]+' '+(on?'on':'off')+'...');
       try{
         const r=await fetch(CONTROL_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({territory:SHOOTER_TERRITORY,field,value:on})});
+          body:JSON.stringify({territory:TERRITORY,field,value:on})});
         const d=await r.json();
         if(!r.ok||!d.ok) throw new Error(d.error||('control '+r.status));
         LAST_STATE[field]=on;
@@ -567,17 +589,26 @@ const CONTROL_URL='/.netlify/functions/control';
         toast('❌',"Couldn't reach the Shooter switch — unchanged");
       }
     }
- 
+
     async function syncSwitches(){
       try{
-        const r=await fetch(CONTROL_URL+'?territory='+SHOOTER_TERRITORY);
+        const r=await fetch(CONTROL_URL+'?territory='+TERRITORY);
         if(!r.ok)return;
         const d=await r.json();
         LAST_STATE={auto_mode:!!d.auto_mode,mms_send:d.mms_send!==false,email_send:d.email_send!==false};
         applyUI(LAST_STATE);
+        // Pull pace settings down too, if the control function returns them.
+        let touched=false;
+        if(typeof d.daily_cap==='number'){paceState.daily=d.daily_cap;const sl=document.getElementById('psSlider');if(sl)sl.value=d.daily_cap;touched=true;}
+        if(typeof d.off_day==='number'){paceState.offDay=d.off_day;document.querySelectorAll('.pday').forEach((el,i)=>el.classList.toggle('off',i===paceState.offDay));touched=true;}
+        if(typeof d.pace_mode==='string'){paceState.mode=(d.pace_mode==='slow'||d.pace_mode==='push')?d.pace_mode:null;touched=true;}
+        if(touched){savePace();updatePaceDisplay();}
+        const ps=document.getElementById('psSync');
+        if(ps)ps.textContent=touched?'Pace: synced with Shooter ✓':'Pace: local only — control fn missing pace fields';
       }catch(e){}
     }
     syncSwitches();
+
 function setDate(){
   const now=new Date();
   document.getElementById('tdate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -658,7 +689,7 @@ function sendCallLink(){
   const c=S.contacts[S.curIdx];
   const price=document.getElementById('yesPrice').value||'99';
   const n=c.owner?c.owner.split(' ')[0]:'there';
-  const phone='(615) 570-0540';
+  const phone='(615) 570-0540'; // TODO: Jason's real number
   const subject=`Let's talk about your website — ${c.biz}`;
   const body=`Hi ${n},
 
@@ -684,6 +715,16 @@ ${phone}`;
     console.error(err);toast('❌','Send failed — check console');
   });
 }
+
+// ── CONTACTS TABLE FILTERS (these were missing — search & pills were dead) ──
+function filterC(q){S.search=(q||'').toLowerCase();renderC();}
+function filterS(s,el){
+  S.filter=s;
+  document.querySelectorAll('#page-contacts .pill').forEach(p=>p.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderC();
+}
+
 function renderC(){
   const list=S.contacts.filter(c=>{
     const ms=S.filter==='all'||c.status===S.filter;
@@ -735,16 +776,27 @@ function renderQ(){
   }
 }
 
+// ── STATS — live pipeline (Supabase) + warm list (local) merged ──
 function updStats(){
   const C=S.contacts;
-  document.getElementById('stot').textContent=C.length;
-  document.getElementById('srdy').textContent=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
-  document.getElementById('srep').textContent=C.filter(c=>c.status==='replied').length;
-  document.getElementById('scust').textContent=C.filter(c=>c.status==='customer').length;
-  document.getElementById('bc').textContent=C.length;
-  document.getElementById('bq').textContent=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
-  document.getElementById('bi').textContent=C.filter(c=>c.status==='replied').length;
-  document.getElementById('bu').textContent=C.filter(c=>c.upsellFlag).length;
+  const pTot=PIPE.length;
+  const pReady=PIPE.filter(l=>l.status==='cleared').length;
+  const pSent=PIPE.filter(l=>l.status==='pitched').length;
+  const mReady=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
+  const rep=C.filter(c=>c.status==='replied').length;
+  const cust=C.filter(c=>c.status==='customer').length;
+  const tot=pTot+C.length;
+  const rdy=pReady+mReady;
+  txt('stot',tot);
+  txt('stotSub',pTot+' pipeline · '+C.length+' warm');
+  txt('srdy',rdy);
+  txt('srdySub',pReady+' auto · '+mReady+' warm · '+pSent+' sent');
+  txt('srep',rep);
+  txt('scust',cust);
+  txt('bc',tot);
+  txt('bq',rdy);
+  txt('bi',rep);
+  txt('bu',C.filter(c=>c.upsellFlag).length);
 }
 
 function mkEmail(c){
@@ -818,7 +870,7 @@ function mkHtmlEmail(plainText, c){
 
     // Signature
     + '<tr><td style="background:#ffffff;padding:20px 36px 24px;border-top:1px solid #f0ede8;">'
-    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Jason Damewood<br>'
+    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Jason<br>'
     + '<span style="color:#888;font-size:12px;">jason@autosite.website</span></p>'
     + '</td></tr>'
 
@@ -876,7 +928,7 @@ function qSend(idx){
     c.activity=c.activity||[];c.activity.unshift({text:'Email sent to '+c.email,time:'Just now',dot:'b'});
     save();updStats();renderC();renderQ();toast('✅','Sent to '+c.email);
   }).catch(err=>{
-    console.error('EmailJS error:',err);
+    console.error('Email send error:',err);
     toast('❌','Send failed — check console');
   });
 }
@@ -988,6 +1040,7 @@ function openEditorFromPanel(){
   toast('🌐', 'Opening builder for ' + c.biz + ' in new tab');
 }
 function togSnooze(id){document.getElementById(id).classList.toggle('open');}
+function chkVac(sel,vnId){const vn=document.getElementById(vnId);if(vn)vn.style.display=sel.value==='client-vacation'?'block':'none';}
 function selSn(el,h){el.closest('.sos').querySelectorAll('.so').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');S.snHrs=h;}
 function confirmPS(){
   if(S.curIdx===null)return;
@@ -1096,31 +1149,216 @@ function saveOnly(){
 function openAdd(){document.getElementById('addMo').classList.add('open');}
 function closeMo(id){document.getElementById(id).classList.remove('open');}
 function addContact(){
-  console.log('addContact fired');
   const bizEl=document.getElementById('abiz');
   const emlEl=document.getElementById('aeml');
-  console.log('biz el:', bizEl, 'eml el:', emlEl);
   const biz=bizEl?bizEl.value.trim():'';
   const email=emlEl?emlEl.value.trim():'';
-  console.log('biz:', biz, 'email:', email);
   if(!biz){toast('⚠️','Business name is required');return;}
   if(!email){toast('⚠️','Email address is required');return;}
   var aphone=document.getElementById('aphon')?document.getElementById('aphon').value.trim():''; var aaddr=document.getElementById('aaddr')?document.getElementById('aaddr').value.trim():''; const c={biz,email,phone:aphone,address:aaddr,owner:document.getElementById('aown').value.trim(),city:document.getElementById('acity').value.trim()||'Your Area',category:document.getElementById('acat').value.trim()||'Local Business',note:document.getElementById('anote').value.trim(),status:'building',added:new Date().toLocaleDateString(),isManual:true,snoozeCount:0,activity:[{text:'Contact added manually',time:'Just now',dot:''}]};
-  console.log('contact object:', c);
   S.contacts.push(c);
-  console.log('contacts length:', S.contacts.length);
   save();updStats();renderC();
   closeMo('addMo');
   ['abiz','aown','aeml','acity','acat','anote','aphon','aaddr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   toast('✓',biz+' added — building website now');
   setTimeout(()=>{c.status='ready';c.pitchText=mkEmail(c);c.activity.unshift({text:'Website built and ready',time:'Just now',dot:'g'});save();updStats();renderC();renderQ();toast('🌐','Website ready for '+c.biz);},2500);
 }
-function handleCSV(e){if(e.target.files[0])toast('📊',e.target.files[0].name+' received — column mapping coming soon');}
+
+// ── CSV IMPORT → EMAIL SHOOTER ──
+// Parses the uploaded CSV, auto-maps columns by header, then asks one
+// question: shooter (agents build + pitch automatically) or warm list.
+let IMP={rows:[],skipped:0,fname:''};
+
+function parseCSV(text){
+  const rows=[];let row=[],cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; }
+      else cur+=ch;
+    }else{
+      if(ch==='"')inQ=true;
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'||ch==='\r'){
+        if(ch==='\r'&&text[i+1]==='\n')i++;
+        row.push(cur);cur='';
+        if(row.some(c=>c.trim()!==''))rows.push(row);
+        row=[];
+      }
+      else cur+=ch;
+    }
+  }
+  row.push(cur);
+  if(row.some(c=>c.trim()!==''))rows.push(row);
+  return rows;
+}
+
+function mapCols(hdr){
+  const m={};
+  hdr.forEach((h,i)=>{
+    const n=(h||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(m.email===undefined&&/mail/.test(n))m.email=i;
+    else if(m.owner===undefined&&/(owner|contact|first|last|person)/.test(n))m.owner=i;
+    else if(m.biz===undefined&&/(business|company|biz|name)/.test(n))m.biz=i;
+    else if(m.phone===undefined&&/(phone|mobile|cell|tel)/.test(n))m.phone=i;
+    else if(m.city===undefined&&/(city|town|location)/.test(n))m.city=i;
+    else if(m.category===undefined&&/(category|type|industry|niche)/.test(n))m.category=i;
+  });
+  return m;
+}
+
+function bizFromEmail(email){
+  const dom=(email.split('@')[1]||'').split('.')[0]||'';
+  if(!dom||/^(gmail|yahoo|hotmail|outlook|aol|icloud|proton|live|msn)$/.test(dom)){
+    const local=(email.split('@')[0]||'').replace(/[._\-+]/g,' ').trim();
+    return local?local.replace(/\b\w/g,ch=>ch.toUpperCase()):email;
+  }
+  return dom.replace(/[-_]/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());
+}
+
+function handleCSV(e){
+  const f=e.target.files[0];
+  if(!f)return;
+  if(/\.xlsx?$/i.test(f.name)){toast('⚠️','Excel files not supported yet — save as CSV first');e.target.value='';return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const rows=parseCSV(ev.target.result||'');
+    if(!rows.length){toast('⚠️','File looks empty');return;}
+    // Header detection: if the first row contains no @, treat it as headers.
+    let cols,start;
+    const hasHeader=!rows[0].some(c=>c.includes('@'));
+    if(hasHeader){cols=mapCols(rows[0]);start=1;}
+    else{
+      // No header — find the email column from the first data row.
+      cols={};
+      rows[0].forEach((c,i)=>{if(cols.email===undefined&&c.includes('@'))cols.email=i;});
+      if(cols.email===undefined)cols.email=0;
+      if(rows[0].length>1)cols.biz=cols.email===0?1:0;
+      start=0;
+    }
+    if(cols.email===undefined){toast('⚠️','No email column found — need a header like "email"');e.target.value='';return;}
+    const seen={};const out=[];let skipped=0;
+    for(let i=start;i<rows.length;i++){
+      const r=rows[i];
+      const email=(r[cols.email]||'').trim().toLowerCase();
+      if(!email||email.indexOf('@')<1||email.indexOf('.')<0){skipped++;continue;}
+      if(seen[email]){skipped++;continue;}
+      seen[email]=true;
+      const biz=(cols.biz!==undefined?(r[cols.biz]||'').trim():'')||bizFromEmail(email);
+      out.push({
+        biz:biz,
+        email:email,
+        owner:cols.owner!==undefined?(r[cols.owner]||'').trim():'',
+        phone:cols.phone!==undefined?(r[cols.phone]||'').trim():'',
+        city:cols.city!==undefined?(r[cols.city]||'').trim():'',
+        category:cols.category!==undefined?(r[cols.category]||'').trim():''
+      });
+    }
+    e.target.value='';
+    if(!out.length){toast('⚠️','No valid emails found in '+f.name);return;}
+    IMP={rows:out,skipped:skipped,fname:f.name};
+    txt('impTxt',out.length+' contacts parsed from '+f.name+(skipped?' ('+skipped+' skipped — bad or duplicate emails)':'')+'. Where should they go?');
+    const st=document.getElementById('impStat');if(st)st.style.display='none';
+    document.getElementById('impMo').classList.add('open');
+  };
+  reader.readAsText(f);
+}
+
+function impStatus(msg,color){
+  const st=document.getElementById('impStat');
+  if(st){st.textContent=msg;st.style.color=color;st.style.display='block';}
+}
+
+// Destination 1: straight into the Supabase leads table as queued email
+// leads — the agents pick them up, build sites, write pitches, and the
+// email shooter fires them at your daily pace. No manual email building.
+async function importToShooter(){
+  if(!IMP.rows.length)return;
+  impStatus('Checking for duplicates already in the pipeline…','var(--muted)');
+  let existing={};
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/leads?territory=eq.'+encodeURIComponent(TERRITORY)+'&select=email&limit=10000',
+      {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    if(r.ok){
+      const d=await r.json();
+      if(Array.isArray(d))d.forEach(l=>{if(l.email)existing[l.email.toLowerCase()]=true;});
+    }
+  }catch(e){console.warn('Dup-check fetch failed:',e);}
+  const fresh=IMP.rows.filter(r=>!existing[r.email]);
+  const dupes=IMP.rows.length-fresh.length;
+  if(!fresh.length){impStatus('All '+IMP.rows.length+' are already in the pipeline — nothing to add.','var(--orange)');return;}
+  impStatus('Loading '+fresh.length+' into the shooter…','var(--muted)');
+  const payload=fresh.map(r=>({
+    territory:TERRITORY,
+    business_name:r.biz,
+    email:r.email,
+    phone:r.phone||null,
+    city:r.city||null,
+    channel:'email',
+    status:'queued'
+  }));
+  let inserted=0,failed=0,policyBlocked=false;
+  for(let i=0;i<payload.length;i+=100){
+    const chunk=payload.slice(i,i+100);
+    try{
+      const res=await fetch(SUPABASE_URL+'/rest/v1/leads',{
+        method:'POST',
+        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+        body:JSON.stringify(chunk)
+      });
+      const body=await res.text();
+      if(res.ok){
+        try{const arr=JSON.parse(body);inserted+=Array.isArray(arr)?arr.length:chunk.length;}catch(e){inserted+=chunk.length;}
+      }else{
+        failed+=chunk.length;
+        if(res.status===401||res.status===403||/policy|permission|row-level/i.test(body))policyBlocked=true;
+        console.error('Lead insert failed:',res.status,body);
+      }
+    }catch(e){failed+=chunk.length;console.error('Lead insert error:',e);}
+  }
+  if(inserted&&!failed){
+    impStatus('✓ '+inserted+' loaded into the shooter'+(dupes?' ('+dupes+' already in pipeline, skipped)':'')+'. Agents will build & pitch at your daily pace.','var(--green)');
+    toast('⚡',inserted+' leads loaded — shooter will take it from here');
+    loadPipe();
+    setTimeout(()=>closeMo('impMo'),2600);
+  }else if(policyBlocked){
+    impStatus('✗ Database blocked the insert — the leads table needs an anon INSERT policy. Ping Jason.','var(--red)');
+  }else{
+    impStatus((inserted?'⚠️ '+inserted+' in, ':'✗ ')+failed+' failed — check console.','var(--red)');
+  }
+}
+
+// Destination 2: warm manual contacts — no auto-fire, Jason sends by hand.
+function importAsWarm(){
+  if(!IMP.rows.length)return;
+  const today=new Date().toLocaleDateString();
+  let added=0;
+  const have={};S.contacts.forEach(c=>{if(c.email)have[c.email.toLowerCase()]=true;});
+  IMP.rows.forEach(r=>{
+    if(have[r.email])return;
+    const c={
+      biz:r.biz,email:r.email,owner:r.owner,phone:r.phone,
+      city:r.city||'Your Area',category:r.category||'Local Business',
+      status:'ready',added:today,isManual:true,snoozeCount:0,
+      activity:[{text:'Imported from '+IMP.fname,time:'Just now',dot:''}]
+    };
+    c.pitchText=mkEmail(c);
+    S.contacts.push(c);
+    added++;
+  });
+  save();updStats();renderC();renderQ();
+  const dupes=IMP.rows.length-added;
+  impStatus('✓ '+added+' added to your warm list'+(dupes?' ('+dupes+' already there, skipped)':'')+'. They\'re in Ready to Send.','var(--green)');
+  toast('🤝',added+' warm contacts added — no auto-fire');
+  setTimeout(()=>closeMo('impMo'),2600);
+}
 
 function toast(icon,msg){document.getElementById('tico').textContent=icon;document.getElementById('tmsg').textContent=msg;const t=document.getElementById('tst');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 
 
-// ── PIPELINE PACE ──
+// ── PIPELINE PACE — now a real control, not a decoration.
+// Slider/modes/day-off save locally AND push to the Shooter via the
+// control function (fields: daily_cap, off_day, pace_mode).
 const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 let paceState = {
   daily: 15,
@@ -1137,8 +1375,8 @@ function initPace(){
   if(row) row.innerHTML=DAYS.map((d,i)=>`<div class="pday${paceState.offDay===i?' off':''}" onclick="toggleOffDay(${i})">${d}</div>`).join('');
   // Check if slow/push week expired
   const now=Date.now();
-  if(paceState.mode==='slow'&&paceState.slowUntil&&now>paceState.slowUntil){paceState.mode=null;savePace();}
-  if(paceState.mode==='push'&&paceState.pushUntil&&now>paceState.pushUntil){paceState.mode=null;savePace();}
+  if(paceState.mode==='slow'&&paceState.slowUntil&&now>paceState.slowUntil){paceState.mode=null;savePace();pushPaceField('pace_mode','normal');}
+  if(paceState.mode==='push'&&paceState.pushUntil&&now>paceState.pushUntil){paceState.mode=null;savePace();pushPaceField('pace_mode','normal');}
   // Set slider
   const sl=document.getElementById('psSlider');
   if(sl) sl.value=paceState.daily;
@@ -1149,18 +1387,36 @@ function savePace(){
   try{localStorage.setItem('autosite_pace',JSON.stringify(paceState));}catch(e){}
 }
 
+// Push one pace field to the Shooter through the same control function
+// the Auto Mode toggles use. Quiet on success, loud on failure.
+async function pushPaceField(field,value){
+  try{
+    const r=await fetch(CONTROL_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({territory:TERRITORY,field:field,value:value})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw new Error((d&&d.error)||('control '+r.status));
+    const ps=document.getElementById('psSync');
+    if(ps)ps.textContent='Pace: synced with Shooter ✓';
+  }catch(e){
+    console.warn('Pace sync failed for '+field+':',e);
+    const ps=document.getElementById('psSync');
+    if(ps)ps.textContent='Pace: saved locally — Shooter didn\'t get '+field;
+    toast('⚠️','Pace saved locally — Shooter sync failed ('+field+')');
+  }
+}
+
 function updatePace(val){
   paceState.daily=+val;
   // Clear mode if manually adjusted
-  if(paceState.mode==='slow'&&+val>5) paceState.mode=null;
-  if(paceState.mode==='push'&&+val<30) paceState.mode=null;
+  if(paceState.mode==='slow'&&+val>5){paceState.mode=null;pushPaceField('pace_mode','normal');}
+  if(paceState.mode==='push'&&+val<30){paceState.mode=null;pushPaceField('pace_mode','normal');}
   updatePaceDisplay();
   savePace();
 }
 
 function updatePaceDisplay(){
   const d=paceState.daily;
-  const activeDays=6; // 7 minus off day
+  const activeDays=paceState.offDay>=0?6:7;
   const weekly=d*activeDays;
   const psv=document.getElementById('psVal');
   const pss=document.getElementById('psSub');
@@ -1186,11 +1442,13 @@ function setSlowWeek(){
     paceState.mode=null;
     document.getElementById('psSlider').value=15;
     paceState.daily=15;
+    pushPaceField('pace_mode','normal');pushPaceField('daily_cap',15);
   } else {
     paceState.mode='slow';
     paceState.slowUntil=Date.now()+(7*24*3600*1000);
     paceState.daily=5;
     document.getElementById('psSlider').value=5;
+    pushPaceField('pace_mode','slow');pushPaceField('daily_cap',5);
   }
   updatePaceDisplay(); savePace();
   toast(paceState.mode==='slow'?'🧊':'✓', paceState.mode==='slow'?'Slow week — 5 leads/day for 7 days':'Slow week cancelled');
@@ -1201,11 +1459,13 @@ function setPushWeek(){
     paceState.mode=null;
     document.getElementById('psSlider').value=15;
     paceState.daily=15;
+    pushPaceField('pace_mode','normal');pushPaceField('daily_cap',15);
   } else {
     paceState.mode='push';
     paceState.pushUntil=Date.now()+(7*24*3600*1000);
     paceState.daily=30;
     document.getElementById('psSlider').value=30;
+    pushPaceField('pace_mode','push');pushPaceField('daily_cap',30);
   }
   updatePaceDisplay(); savePace();
   toast(paceState.mode==='push'?'🔥':'✓', paceState.mode==='push'?'Push week — 30 leads/day for 7 days':'Push week cancelled');
@@ -1215,23 +1475,23 @@ function toggleOffDay(idx){
   paceState.offDay=paceState.offDay===idx?-1:idx;
   document.querySelectorAll('.pday').forEach((d,i)=>d.classList.toggle('off',i===paceState.offDay));
   updatePaceDisplay(); savePace();
+  pushPaceField('off_day',paceState.offDay);
   toast('📅', paceState.offDay>=0?DAYS[paceState.offDay]+' set as day off':'Day off cleared');
 }
 
 load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
+loadPipe();setInterval(loadPipe,60000);
 </script>
 
 </body>
 
 <!-- ════════════════════════════════════════════════════════════════════
      PIPELINE VIEW — live window into the agent leads table.
-     Paste this whole block at the very BOTTOM of index.html, just BEFORE
-     the closing </body></html> (right after the enrichment block is fine).
-     It adds a "📊 Pipeline" button to the top bar that opens a full-screen
+     Adds a "📊 Pipeline" button to the top bar that opens a full-screen
      live view of leads moving through the stages, scoped to this dashboard's
      territory. Read-only. Auto-refreshes every 30s while open.
-     Reuses the SUPABASE_URL + SUPABASE_KEY + TERRITORY already defined
-     in the enrichment block, so nothing else is needed.
+     Uses the shared SUPABASE_URL + SUPABASE_KEY + TERRITORY consts
+     defined at the top of the main script.
      ════════════════════════════════════════════════════════════════════ -->
 
 <div id="pl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,0.55);z-index:998"></div>
@@ -1288,12 +1548,11 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
   var PL_DATA = [];
   var PL_TIMER = null;
 
-  // Self-contained config — no longer depends on the Enricher block.
-  // territory falls back to the dashboard's TERRITORY const if present,
-  // else to the baked-in default below. SET THIS to match the dashboard.
+  // Shared config from the main script (SUPABASE_URL / SUPABASE_KEY /
+  // TERRITORY consts at the top). Fallbacks kept for safety.
   var PL_SUPABASE_URL = 'https://iplzsgxwqmrnbvtafagu.supabase.co';
   var PL_SUPABASE_KEY = 'sb_publishable_HRhE8feahlMooWeLw88XWQ_rHYPpjh9';
-  var PL_TERRITORY    = 'nashville';  // ← set per dashboard (nashville / steubenville)
+  var PL_TERRITORY    = 'nashville';
 
   function plCfg(){
     return {
@@ -1445,18 +1704,6 @@ load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
 
   window.plSetFilter = function(k){ PL_FILTER=k; plRenderFilters(); plRenderRows(); };
 
-  // Manual refresh that forces a reload even if a panel is open, with feedback
-  window.plRefreshClick = async function(btn){
-    var orig = btn.textContent;
-    btn.textContent = '↻ Refreshing…'; btn.disabled = true;
-    // collapse any open panels so the forced reload can run
-    Array.prototype.forEach.call(document.querySelectorAll('[id^="pl-msg-"]'), function(el){ el.style.display='none'; });
-    await plLoad();
-    btn.textContent = '✓ Updated'; 
-    setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 1200);
-  };
-
-  // Expand/collapse a lead's outgoing message for gut-checking before it sends
   // ── PRIORITY REORDER ──
   // ▲ bumps a lead to the front of whichever stage it's currently sitting in
   // (queue_rank lower = processed sooner; workers now order by this first).
