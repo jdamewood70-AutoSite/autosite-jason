@@ -11,7 +11,7 @@
 //
 // ENV on this Netlify site: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
-const ALLOWED_FIELDS = ['auto_mode', 'mms_send', 'email_send'];
+const ALLOWED = ['auto_mode','mms_send','email_send','daily_cap','off_day','pace_mode'];
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return resp(204, '');
