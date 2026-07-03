@@ -1,113 +1,86 @@
 // netlify/functions/control.js
-// Reads/writes the three dashboard switches in shooter_control:
-//   auto_mode  (master pipeline on/off)
-//   mms_send   (MMS pitcher fire on/off)
-//   email_send (email pitcher fire on/off)
 //
-//   GET  /.netlify/functions/control?territory=nashville
-//        -> { ok:true, auto_mode, mms_send, email_send, daily_cap, email_daily_cap }
-//   POST body {territory, field, value}   field in [auto_mode, mms_send, email_send]
-//        -> { ok:true, [field]: value }
+// The dashboard's on/off switches and the MMS pace panel both talk to this.
+//   GET  /control?territory=nashville        -> returns that territory's settings row
+//   POST /control  {territory, field, value} -> writes ONE whitelisted field
 //
-// ENV on this Netlify site: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+// Uses the SERVICE ROLE key (server-side only — never ship this key to the browser)
+// so it bypasses RLS. Set these two in Netlify → Site settings → Environment variables:
+//   SUPABASE_URL                 e.g. https://iplzsgxwqmrnbvtafagu.supabase.co
+//   SUPABASE_SERVICE_ROLE_KEY    the service_role key from Supabase → Project → API
+//
+// Zero npm dependencies — plain fetch to the REST API.
 
-const ALLOWED = ['auto_mode','mms_send','email_send','daily_cap','off_day','pace_mode'];
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return resp(204, '');
+// Only these columns can be written from the dashboard. Anything else is rejected.
+// (This is the whitelist. If you add a new control later, add its column name here.)
+const ALLOWED = ['auto_mode', 'mms_send', 'email_send', 'daily_cap', 'off_day', 'pace_mode'];
 
-  const sbUrl = process.env.SUPABASE_URL;
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!sbUrl || !sbKey) return resp(500, { ok: false, error: 'Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY on this site' });
-
-  const enc = encodeURIComponent;
-  const H = { 'apikey': sbKey, 'Authorization': `Bearer ${sbKey}`, 'Content-Type': 'application/json' };
-
-  try {
-    if (event.httpMethod === 'GET') {
-      const territory = (event.queryStringParameters && event.queryStringParameters.territory || 'nashville').toLowerCase();
-      const r = await fetch(`${sbUrl}/rest/v1/shooter_control?territory=eq.${enc(territory)}&select=auto_mode,mms_send,email_send,daily_cap,email_daily_cap&limit=1`, { headers: H });
-      const rows = await r.json();
-      // If Supabase rejected the request (bad key, bad project, RLS, etc.) it
-      // returns an error OBJECT, not an array — the old code silently treated
-      // that as "no row" and returned all-false defaults, masking a real
-      // auth/config failure as if the switches were simply off. Surface it instead.
-      if (!r.ok || !Array.isArray(rows)) {
-        console.error('[control] Supabase GET failed:', r.status, JSON.stringify(rows));
-        return resp(502, { ok: false, error: 'Supabase query failed — check SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY on this site', detail: rows });
-      }
-      const row = rows[0] || {};
-      if (!rows.length) {
-        console.warn('[control] No shooter_control row found for territory:', territory);
-      }
-      return resp(200, {
-        ok: true,
-        auto_mode: !!row.auto_mode,
-        mms_send: row.mms_send !== false,      // default true if column null
-        email_send: row.email_send !== false,
-        daily_cap: row.daily_cap ?? null,
-        email_daily_cap: row.email_daily_cap ?? null,
-      });
-    }
-
-    if (event.httpMethod === 'POST') {
-      const body = JSON.parse(event.body || '{}');
-      const territory = (body.territory || 'nashville').toLowerCase();
-      const field = body.field;
-      const value = !!body.value;
-
-      if (!ALLOWED_FIELDS.includes(field)) {
-        return resp(400, { ok: false, error: `field must be one of ${ALLOWED_FIELDS.join(', ')}` });
-      }
-
-      const patch = await fetch(`${sbUrl}/rest/v1/shooter_control?territory=eq.${enc(territory)}`, {
-        method: 'PATCH',
-        headers: { ...H, 'Prefer': 'return=representation' },
-        body: JSON.stringify({ [field]: value }),
-      });
-      let rows = await patch.json();
-
-      // Only auto-create if the PATCH truly matched nothing. Guard against the
-      // silent-duplicate bug: verify with a fresh SELECT before inserting, so a
-      // transient/odd PATCH response can never spawn a second row for a territory
-      // that already has one (which made reads flip between rows unpredictably).
-      if (!Array.isArray(rows) || rows.length === 0) {
-        const check = await fetch(`${sbUrl}/rest/v1/shooter_control?territory=eq.${enc(territory)}&select=territory&limit=1`, { headers: H });
-        const existing = await check.json();
-        if (Array.isArray(existing) && existing.length > 0) {
-          // Row exists after all (PATCH response was empty for some other reason,
-          // e.g. return=representation hiccup) — do NOT insert a duplicate.
-          console.error('[control] PATCH matched 0 rows but row exists on recheck — territory:', territory, 'field:', field);
-          return resp(500, { ok: false, error: 'Update did not confirm — row exists but PATCH returned empty. No change made; please retry.' });
-        }
-        const seed = { territory, auto_mode: false, mms_send: true, email_send: true, daily_cap: 30, email_daily_cap: 10 };
-        seed[field] = value;
-        const ins = await fetch(`${sbUrl}/rest/v1/shooter_control`, {
-          method: 'POST', headers: { ...H, 'Prefer': 'return=representation' }, body: JSON.stringify(seed),
-        });
-        rows = await ins.json();
-      }
-
-      const row = (Array.isArray(rows) && rows[0]) ? rows[0] : { [field]: value };
-      return resp(200, { ok: true, [field]: !!row[field] });
-    }
-
-    return resp(405, { ok: false, error: 'Use GET or POST' });
-  } catch (err) {
-    console.error('[control] error:', err);
-    return resp(500, { ok: false, error: err.message || 'Server error' });
-  }
+const HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Content-Type': 'application/json'
 };
 
-function resp(statusCode, body) {
-  return {
-    statusCode,
+function sb(path, opts = {}) {
+  return fetch(SUPABASE_URL + '/rest/v1' + path, {
+    ...opts,
     headers: {
+      apikey: SERVICE_KEY,
+      Authorization: 'Bearer ' + SERVICE_KEY,
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    },
-    body: typeof body === 'string' ? body : JSON.stringify(body),
-  };
+      ...(opts.headers || {})
+    }
+  });
 }
+
+function resp(statusCode, obj) {
+  return { statusCode, headers: HEADERS, body: JSON.stringify(obj) };
+}
+
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: HEADERS, body: '' };
+
+  try {
+    // ── READ: dashboard pulls current settings on load and to sync the pace panel ──
+    if (event.httpMethod === 'GET') {
+      const territory = (event.queryStringParameters || {}).territory;
+      if (!territory) return resp(400, { ok: false, error: 'territory required' });
+
+      const r = await sb('/shooter_control?territory=eq.' + encodeURIComponent(territory) +
+        '&select=territory,auto_mode,mms_send,email_send,daily_cap,off_day,pace_mode');
+      const rows = await r.json();
+      // Return the fields at the top level — the dashboard reads d.auto_mode, d.daily_cap, etc.
+      const row = (Array.isArray(rows) && rows[0]) ? rows[0] : { territory };
+      return resp(200, row);
+    }
+
+    // ── WRITE: one field at a time, e.g. {territory:'nashville', field:'daily_cap', value:20} ──
+    if (event.httpMethod === 'POST') {
+      const { territory, field, value } = JSON.parse(event.body || '{}');
+      if (!territory || !field) return resp(400, { ok: false, error: 'territory and field required' });
+      if (!ALLOWED.includes(field)) return resp(400, { ok: false, error: 'field not allowed: ' + field });
+
+      const row = { territory, [field]: value, updated_at: new Date().toISOString() };
+
+      // Upsert so a brand-new territory gets its row created on the first toggle,
+      // and existing rows just get the one field merged in.
+      const r = await sb('/shooter_control?on_conflict=territory', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify(row)
+      });
+      const body = await r.text();
+      if (!r.ok) return resp(r.status, { ok: false, error: body });
+
+      return resp(200, { ok: true, territory, field, value });
+    }
+
+    return resp(405, { ok: false, error: 'method not allowed' });
+  } catch (e) {
+    return resp(500, { ok: false, error: String((e && e.message) || e) });
+  }
+};
