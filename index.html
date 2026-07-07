@@ -286,8 +286,8 @@ td{padding:12px 16px;font-size:12px;vertical-align:middle}
       <div class="sr">
         <div class="sc"><div class="slbl">Total Contacts</div><div class="sval" id="stot">0</div><div class="ssub" id="stotSub">in your list</div></div>
         <div class="sc"><div class="slbl">Ready to Send</div><div class="sval" id="srdy">0</div><div class="ssub" id="srdySub">awaiting review</div></div>
-        <div class="sc g"><div class="slbl">Replies</div><div class="sval" id="srep">0</div><div class="ssub">need response</div></div>
-        <div class="sc b"><div class="slbl">Customers</div><div class="sval" id="scust">0</div><div class="ssub">signed up</div></div>
+        <div class="sc g"><div class="slbl">Sites Live</div><div class="sval" id="srep">0</div><div class="ssub">customer sites</div></div>
+        <div class="sc b"><div class="slbl">Customers</div><div class="sval" id="scust">0</div><div class="ssub">paying now</div></div>
       </div>
       <div class="cl o" id="acallout" style="display:none;"><p><strong>⚡ Auto Mode is On.</strong> Queue runs automatically. Replies still come to you.</p></div>
       <div class="card" style="padding:22px 26px;margin-bottom:22px;">
@@ -797,26 +797,40 @@ function renderQ(){
   }
 }
 
-// ── STATS — live pipeline (Supabase) + warm list (local) merged ──
+// ── STATS — live pipeline (Supabase) + real customers (customer-stats fn) ──
+// Total/Ready come straight from the live pipeline (PIPE). Customers and
+// Sites Live come from the real customers table via the customer-stats
+// Netlify function (counts only, no PII).
+let CUSTSTATS = { total: 0, active: 0, sitesLive: 0 };
+
+async function loadCustStats(){
+  try{
+    const r = await fetch('/.netlify/functions/customer-stats');
+    const d = await r.json();
+    if(d && d.ok){ CUSTSTATS = { total:d.total||0, active:d.active||0, sitesLive:d.sitesLive||0 }; }
+    else { console.warn('customer-stats not ok:', d); }
+  }catch(e){ console.warn('customer-stats fetch failed:', e); }
+  updStats();
+}
+
 function updStats(){
   const C=S.contacts;
   const pTot=PIPE.length;
   const pReady=PIPE.filter(l=>l.status==='cleared').length;
   const pSent=PIPE.filter(l=>l.status==='pitched').length;
-  const mReady=C.filter(c=>c.status==='ready'||c.status==='snoozed').length;
-  const rep=C.filter(c=>c.status==='replied').length;
-  const cust=C.filter(c=>c.status==='customer').length;
-  const tot=pTot+C.length;
-  const rdy=pReady+mReady;
+  const tot=pTot;
+  const rdy=pReady;
+  const cust=CUSTSTATS.active;
+  const sites=CUSTSTATS.sitesLive;
   txt('stot',tot);
-  txt('stotSub',pTot+' pipeline · '+C.length+' warm');
+  txt('stotSub',pTot+' in pipeline · '+pSent+' pitched');
   txt('srdy',rdy);
-  txt('srdySub',pReady+' auto · '+mReady+' warm · '+pSent+' sent');
-  txt('srep',rep);
+  txt('srdySub',pReady+' cleared · '+pSent+' sent');
+  txt('srep',sites);
   txt('scust',cust);
   txt('bc',tot);
   txt('bq',rdy);
-  txt('bi',rep);
+  txt('bi',sites);
   txt('bu',C.filter(c=>c.upsellFlag).length);
 }
 
@@ -1502,6 +1516,7 @@ function toggleOffDay(idx){
 
 load();setDate();updStats();renderC();renderQ();initPace();updatePaceDisplay();
 loadPipe();setInterval(loadPipe,60000);
+loadCustStats();setInterval(loadCustStats,60000);
 </script>
 
 </body>
