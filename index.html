@@ -837,84 +837,53 @@ function updStats(){
 function mkEmail(c){
   var n = c.owner ? c.owner.split(' ')[0] : 'there';
   var url = buildPitchURL(c);
-  return 'Hi ' + n + ',\n\nI\'m Jason, and I help local businesses in the ' + (c.city||'area') + ' get a professional website up fast — usually within 24 hours.\n\nI put together a free sample website for ' + c.biz + '. No cost, no commitment — I just wanted to show you what it could look like.\n\nClick the button in this email to see your site. Takes about 30 seconds to load and it\'s built around your business.\n\nIf you like it, you can launch it right from there for $29.99/month. If not, no worries at all.\n\nWould love to hear what you think!\n\nJason\njason@autosite.website';
+  return 'Hi ' + n + ',\n\nI\'m Jason — I work with local businesses in ' + (c.city||'the area') + ' on their online presence.\n\nI took a look at ' + c.biz + ' and put something together for you. It\'s a quick preview of what your business could look like online — took me about 20 minutes to set up.\n\nNo pitch, no commitment. I just wanted to show you what was possible. Take a look when you get a chance:\n\n' + url + '\n\nHappy to answer any questions if you have them.\n\nJason\njason@autosite.website\n(615) 555-0100';
 }
 
 function mkHtmlEmail(plainText, c){
-  var primaryColor = (c.colors && c.colors.primary) || '#1a1a2e';
-  var accentColor  = (c.colors && c.colors.accent)  || '#c9a84c';
-  var t = c.siteText || {};
-  var headline = t.headline || c.biz;
-  var tagline  = t.tagline  || (c.category || 'Local Business');
-  var city     = c.city     || 'your area';
+  var accentColor = (c.colors && c.colors.accent) || '#c9a84c';
   var pitchURL = buildPitchURL(c);
-
-  // City hero photo via Pixabay (same key as builder)
-  var cityClean = city.replace(/,.*$/, '').trim();
-  var heroImg = 'https://pixabay.com/api/?key=55978758-91039875822fc6ce5299ef195&q=' + encodeURIComponent(cityClean + ' skyline cityscape') + '&image_type=photo&orientation=horizontal&per_page=3&safesearch=true';
-  // Use a reliable fallback city image for email (can't do async in email)
-  // We'll use a direct picsum with city seed for email reliability
-  var citySeed = cityClean.toLowerCase().replace(/[^a-z]/g, '').slice(0, 10) || 'city';
-  var heroImgUrl = 'https://picsum.photos/seed/' + citySeed + '/600/280';
-
-  // Services grid
-  var rawServices = t.services || '';
-  var svcItems = '';
-  if (rawServices.trim()) {
-    svcItems = rawServices.split('\n').filter(function(s){ return s.trim(); }).slice(0, 6).map(function(s){
-      return '<td style="width:33%;padding:10px 8px;text-align:center;vertical-align:top;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">' + s.trim() + '</div></td>';
-    }).join('');
-  } else {
-    svcItems = '<td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Quality Work</div></td><td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Locally Owned</div></td><td style="padding:10px 8px;text-align:center;"><div style="font-size:11px;font-weight:700;color:' + primaryColor + ';text-transform:uppercase;letter-spacing:1px;">Fast Response</div></td>';
-  }
+  var screenshotUrl = (c.screenshotUrl || c.screenshot_url || '').trim();
 
   // Message paragraphs
-  var msgHtml = plainText.split('\n').filter(function(l){ return l.trim(); }).map(function(l){
-    return '<p style="margin:0 0 12px;font-size:15px;color:#333;line-height:1.75;">' + l + '</p>';
+  var msgHtml = plainText.split('\n').map(function(l){
+    return l.trim()
+      ? '<p style="margin:0 0 16px;font-size:15px;color:#2a2a2a;line-height:1.8;font-family:Arial,sans-serif;">' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>'
+      : '';
   }).join('');
 
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f5f5f0;font-family:Georgia,serif;">'
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;"><tr><td align="center">'
-    + '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">'
+  // Swap plain URL in body with a simple text link
+  msgHtml = msgHtml.replace(
+    new RegExp(pitchURL.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'),
+    '<a href="' + pitchURL + '" style="color:' + accentColor + ';font-weight:600;">View the preview &rarr;</a>'
+  );
 
-    // Hero city photo
-    + '<tr><td style="padding:0;line-height:0;">'
-    + '<img src="' + heroImgUrl + '" width="600" style="width:100%;max-width:600px;height:auto;display:block;" alt="' + cityClean + '">'
-    + '</td></tr>'
+  // Site mockup screenshot block — only if we have a real R2 URL
+  var screenshotBlock = screenshotUrl
+    ? '<table cellpadding="0" cellspacing="0" width="100%" style="margin:8px 0 24px;">'
+      + '<tr><td style="padding:0;">'
+      + '<a href="' + pitchURL + '" style="display:block;text-decoration:none;">'
+      + '<img src="' + screenshotUrl + '" alt="' + (c.biz||'Your site') + ' preview" width="520" '
+      + 'style="width:100%;max-width:520px;height:auto;display:block;border:1px solid #e0dbd4;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">'
+      + '<div style="background:' + accentColor + ';padding:10px 20px;text-align:center;border-radius:0 0 4px 4px;">'
+      + '<span style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#111;">Click to customize &amp; launch &rarr;</span>'
+      + '</div>'
+      + '</a>'
+      + '</td></tr></table>'
+    : '';
 
-    // Business name overlay bar
-    + '<tr><td style="background:' + primaryColor + ';padding:20px 28px;text-align:center;">'
-    + '<div style="font-size:28px;font-weight:700;color:#ffffff;margin-bottom:6px;">' + headline + '</div>'
-    + '<div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:' + accentColor + ';">' + tagline + ' &nbsp;&middot;&nbsp; ' + city + '</div>'
-    + '</td></tr>'
-
-    // Big CTA button
-    + '<tr><td style="background:#ffffff;padding:28px 36px;text-align:center;border-bottom:3px solid ' + accentColor + ';">'
-    + '<p style="margin:0 0 20px;font-size:16px;color:#333;line-height:1.7;">We built a free website for <strong>' + c.biz + '</strong>. Click below to see it — takes about 30 seconds to load.</p>'
-    + '<a href="' + pitchURL + '" style="display:inline-block;background:' + accentColor + ';color:#111111;padding:16px 40px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:1px;border-radius:3px;">&#128064; View Your Website &rarr;</a>'
-    + '<p style="margin:16px 0 0;font-size:11px;color:#aaa;">If you like it, you can launch it for $29.99/mo right from there. No pressure.</p>'
-    + '</td></tr>'
-
-    // Message body
-    + '<tr><td style="background:#ffffff;padding:24px 36px 8px;">' + msgHtml + '</td></tr>'
-
-    // Services strip
-    + '<tr><td style="background:#f8f6f2;padding:14px 12px;border-top:1px solid #e8e5e0;">'
-    + '<table width="100%" cellpadding="0" cellspacing="0"><tr>' + svcItems + '</tr></table>'
-    + '</td></tr>'
-
-    // Signature
-    + '<tr><td style="background:#ffffff;padding:20px 36px 24px;border-top:1px solid #f0ede8;">'
-    + '<p style="margin:0;font-size:14px;color:#333;line-height:1.8;">Jason<br>'
-    + '<span style="color:#888;font-size:12px;">jason@autosite.website</span></p>'
-    + '</td></tr>'
-
-    // Footer
-    + '<tr><td style="padding:14px 36px;text-align:center;">'
-    + '<p style="margin:0;font-size:10px;color:#aaa;line-height:1.6;">This is a free sample site built for ' + c.biz + '. To opt out, reply with "no thanks."</p>'
-    + '</td></tr>'
-
-    + '</table></td></tr></table></body></html>';
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+    + '<body style="margin:0;padding:0;background:#ffffff;">'
+    + '<table width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:40px 24px;max-width:560px;margin:0 auto;display:block;">'
+    + msgHtml
+    + screenshotBlock
+    + '<table cellpadding="0" cellspacing="0" style="margin:' + (screenshotBlock ? '0' : '24px') + ' 0 24px;">'
+    + '<tr><td style="background:' + accentColor + ';border-radius:4px;">'
+    + '<a href="' + pitchURL + '" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;font-family:Arial,sans-serif;">See the preview &rarr;</a>'
+    + '</td></tr></table>'
+    + '<p style="margin:32px 0 4px;font-size:13px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #eee;padding-top:16px;">To opt out, reply with "unsubscribe".</p>'
+    + '</td></tr></table>'
+    + '</body></html>';
 }
 
 
@@ -937,7 +906,7 @@ function sendAll(){
       const n=c.owner?c.owner.split(' ')[0]:'there';
       const htmlBody=mkHtmlEmail(mkEmail(c),c);
       emailjs.send('service_5hult2p','template_fibtrap',{
-        name:n,title:`I built a free website for ${c.biz}`,message:htmlBody,email:c.email,time:new Date().toLocaleString()
+        name:n,title:c.subject||`Quick question — ${c.biz}`,message:htmlBody,email:c.email,time:new Date().toLocaleString()
       }).then(()=>{
         c.status='sent';c.lastActivity='Sent today';c.activity=c.activity||[];c.activity.unshift({text:'Email sent to '+c.email,time:'Just now',dot:'b'});
         sent++;if(sent+failed===r.length)done();
@@ -949,7 +918,7 @@ function sendAll(){
 function qSend(idx){
   const c=S.contacts[idx];
   if(!c.email){toast('⚠️','No email address for '+c.biz);return;}
-  const subj=c.subject||`I built a free website for ${c.biz}`;
+  const subj=c.subject||`Quick question — ${c.biz}`;
   // Use whatever is in the textarea if panel is open, else fall back to auto-gen
   const taEl=document.getElementById('dpbody');
   const plainText=(taEl&&taEl.value.trim())?taEl.value.trim():mkEmail(c);
@@ -1041,7 +1010,7 @@ function openC(idx){
   document.getElementById('dptbn').textContent=c.biz;
   document.getElementById('dptct').textContent=c.category||'Local Business';
   document.getElementById('dpto').textContent=c.email||'—';
-  document.getElementById('dpsubj').value=c.subject||`I built a free website for ${c.biz}`;
+  document.getElementById('dpsubj').value=c.subject||`Quick question — ${c.biz}`;
   document.getElementById('dpbody').value=c.pitchText||mkEmail(c);
   updCC();c.touched=true;
   document.getElementById('dpinfo').innerHTML=`<div class="ii"><label>Email</label><span>${c.email||'—'}</span></div><div class="ii"><label>Category</label><span>${c.category||'—'}</span></div><div class="ii"><label>City</label><span>${c.city||'—'}</span></div><div class="ii"><label>Status</label><span>${c.status||'New'}</span></div><div class="ii"><label>Snoozes</label><span>${c.snoozeCount||0}/${c.vacSnooze?3:2}</span></div><div class="ii"><label>Added</label><span>${c.added||'Today'}</span></div>`;
