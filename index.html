@@ -1619,7 +1619,7 @@ loadCustStats();setInterval(loadCustStats,60000);
     try{
       var q = '/leads?territory=eq.'+encodeURIComponent(c.terr)+
               '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,queue_rank,updated_at'+
-              '&order=updated_at.desc&limit=500';
+              '&order=updated_at.desc&limit=2000';
       var res = await fetch(c.url+'/rest/v1'+q, {
         headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key }
       });
