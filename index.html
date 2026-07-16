@@ -1618,7 +1618,7 @@ loadCustStats();setInterval(loadCustStats,60000);
     loading.style.display='block'; empty.style.display='none';
     try{
       var q = '/leads?territory=eq.'+encodeURIComponent(c.terr)+
-              '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,queue_rank,updated_at'+
+              '&select=id,business_name,channel,status,email,phone,city,cold_message,screenshot_url,queue_rank,updated_at,email_status'+
               '&order=updated_at.desc&limit=2000';
       var res = await fetch(c.url+'/rest/v1'+q, {
         headers:{ 'apikey':c.key, 'Authorization':'Bearer '+c.key }
@@ -1683,6 +1683,23 @@ loadCustStats();setInterval(loadCustStats,60000);
     document.getElementById('pl-rows').innerHTML = rows.map(function(l, i){
       var s = plStageInfo(l.status);
       var chIcon = l.channel==='mms' ? '📱 MMS' : '✉️ Email';
+      // Delivery status badge (email only) — from the Resend webhook writeback
+      var delBadge = '';
+      if (l.channel === 'email' && l.email_status) {
+        var dmap = {
+          delivered:  ['✓ Delivered','#4a9e6b'],
+          opened:     ['👁 Opened','#3b82c4'],
+          clicked:    ['🔗 Clicked','#7c5cc4'],
+          bounced:    ['✗ Bounced','#c0492b'],
+          failed:     ['✗ Failed','#c0492b'],
+          complained: ['⚠ Spam','#c0492b'],
+          suppressed: ['⊘ Suppressed','#9a7d2b'],
+          delayed:    ['⏳ Delayed','#9a7d2b'],
+          sent:       ['→ Sent','#9a9189'],
+        };
+        var d = dmap[l.email_status] || [l.email_status,'#9a9189'];
+        delBadge = '<div style="margin-top:3px"><span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:9px;font-weight:600;background:'+d[1]+'18;color:'+d[1]+'">'+d[0]+'</span></div>';
+      }
       var contact = l.email || l.phone || '—';
       var msg = (l.cold_message||'').trim();
       var hasMsg = msg.length > 0;
@@ -1708,7 +1725,7 @@ loadCustStats();setInterval(loadCustStats,60000);
         + prioCell
         + '<td style="padding:10px;font-size:12px;font-weight:600;color:#1c1a17">'+(isBumped?'<span title="Prioritized — processes next" style="color:#c9a84c;margin-right:4px">★</span>':'')+(l.business_name||'—')
           + (l.city?'<div style="font-size:10px;color:#9a9189;font-weight:400">'+l.city+'</div>':'')+'</td>'
-        + '<td style="padding:10px;font-size:11px;color:#9a9189">'+chIcon+'</td>'
+        + '<td style="padding:10px;font-size:11px;color:#9a9189">'+chIcon+delBadge+'</td>'
         + '<td style="padding:10px"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;background:'+s.color+'18;color:'+s.color+'">'+s.label+'</span></td>'
         + '<td style="padding:10px;font-size:11px;color:#9a9189">'+caret+'</td>'
         + '</tr>'
