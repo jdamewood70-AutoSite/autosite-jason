@@ -286,6 +286,7 @@ td{padding:12px 16px;font-size:12px;vertical-align:middle}
       <div class="sr">
         <div class="sc"><div class="slbl">Total Contacts</div><div class="sval" id="stot">0</div><div class="ssub" id="stotSub">in your list</div></div>
         <div class="sc"><div class="slbl">Ready to Send</div><div class="sval" id="srdy">0</div><div class="ssub" id="srdySub">awaiting review</div></div>
+        <div class="sc"><div class="slbl">Contacts Reached</div><div class="sval" id="sdel">0</div><div class="ssub" id="sdelSub">0 email · 0 text</div></div>
         <div class="sc g"><div class="slbl">Sites Live</div><div class="sval" id="srep">0</div><div class="ssub">customer sites</div></div>
         <div class="sc b"><div class="slbl">Customers</div><div class="sval" id="scust">0</div><div class="ssub">paying now</div></div>
       </div>
@@ -312,7 +313,7 @@ td{padding:12px 16px;font-size:12px;vertical-align:middle}
         <div class="ttb"><div class="sw"><input type="text" placeholder="Search contacts..." oninput="filterC(this.value)"/></div>
           <div class="pills"><div class="pill active" onclick="filterS('all',this)">All</div><div class="pill" onclick="filterS('ready',this)">Ready</div><div class="pill" onclick="filterS('snoozed',this)">Snoozed</div><div class="pill" onclick="filterS('sent',this)">Sent</div><div class="pill" onclick="filterS('replied',this)">Replied</div><div class="pill" onclick="filterS('customer',this)">Customers</div></div>
         </div>
-        <table><thead><tr><th>Business</th><th>Owner</th><th>Email</th><th>Category</th><th>Status</th><th>Last Activity</th><th></th></tr></thead><tbody id="ctbody"></tbody></table>
+        <table><thead><tr><th>Business</th><th>Channel</th><th>Contact</th><th>Category</th><th>Status</th><th>Delivered</th><th></th></tr></thead><tbody id="ctbody"></tbody></table>
       </div>
     </div>
 
@@ -528,7 +529,7 @@ function txt(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 // badges reflect what the agents are actually doing, not just the warm list.
 async function loadPipe(){
   try{
-    const q='/rest/v1/leads?territory=eq.'+encodeURIComponent(TERRITORY)+'&select=id,status,channel,email,business_name,city,category,phone,cold_message,screenshot_url,queue_rank&order=queue_rank.asc.nullslast,updated_at.desc&limit=2000';
+    const q='/rest/v1/leads?territory=eq.'+encodeURIComponent(TERRITORY)+'&select=id,status,channel,email,business_name,city,category,phone,cold_message,screenshot_url,queue_rank,email_status,email_sent_at,email_status_at&order=queue_rank.asc.nullslast,updated_at.desc&limit=2000';
     const r=await fetch(SUPABASE_URL+q,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     if(r.ok){
       const d=await r.json();
@@ -537,6 +538,7 @@ async function loadPipe(){
   }catch(e){console.warn('Pipeline stats fetch failed:',e);}
   updStats();
   if(typeof renderQ==='function') renderQ();
+  if(typeof renderC==='function') renderC();
 }
 
 function makeSite(c,p,a,logo,txt){
@@ -747,28 +749,49 @@ function deletePanelContact(){
 }
 
 function renderC(){
-  const list=S.contacts.filter(c=>{
-    const ms=S.filter==='all'||c.status===S.filter;
-    const mq=!S.search||c.biz.toLowerCase().includes(S.search)||( c.owner&&c.owner.toLowerCase().includes(S.search))||(c.city&&c.city.toLowerCase().includes(S.search));
-    return ms&&mq;
+  // Read from the LIVE pipeline (Supabase), not stale local storage.
+  // Map pipeline status → the filter tabs this page uses.
+  // cleared = not yet contacted (Ready); pitched = contacted (Sent).
+  const touchStatus = (l) => {
+    if (l.status === 'pitched') return 'sent';
+    if (l.status === 'cleared') return 'ready';
+    if (l.status === 'pitch-hold') return 'snoozed';
+    return l.status || 'ready';
+  };
+  const list = PIPE.filter(l=>{
+    const st = touchStatus(l);
+    const ms = S.filter==='all' || st===S.filter;
+    const q = S.search;
+    const mq = !q || (l.business_name&&l.business_name.toLowerCase().includes(q))
+      || (l.city&&l.city.toLowerCase().includes(q))
+      || (l.email&&l.email.toLowerCase().includes(q));
+    return ms && mq;
   });
   const tbody=document.getElementById('ctbody');
   if(!tbody)return;
-  if(!list.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">No contacts yet — add one to get started.</td></tr>';return;}
-  const statusLabel={building:'Building',ready:'Ready',sent:'Sent',replied:'Replied',snoozed:'Snoozed',customer:'Customer',passed:'Passed'};
-  const statusClass={building:'bbl',ready:'brd',sent:'bn',replied:'bst',snoozed:'bsn',customer:'bst',passed:'bsk'};
-  tbody.innerHTML=list.map((c,i)=>{
-    const ri=S.contacts.indexOf(c);
-    const sl=statusLabel[c.status]||c.status;
-    const sc=statusClass[c.status]||'bbl';
-    return `<tr onclick="openC(${ri})">
-      <td><div class="tbz">${c.biz}</div><div class="tbs">${c.city||''}</div></td>
-      <td>${c.owner||'—'}</td>
-      <td>${c.email||'—'}</td>
-      <td>${c.category||'—'}</td>
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">No contacts match this filter.</td></tr>';return;}
+  const statusLabel={ready:'Ready',sent:'Sent',snoozed:'On Hold'};
+  const statusClass={ready:'brd',sent:'bn',snoozed:'bsn'};
+  // Delivery badge for email leads that were sent
+  const delMap={delivered:['✓ Delivered','#4a9e6b'],opened:['👁 Opened','#3b82c4'],clicked:['🔗 Clicked','#7c5cc4'],bounced:['✗ Bounced','#c0492b'],failed:['✗ Failed','#c0492b'],complained:['⚠ Spam','#c0492b'],suppressed:['⊘ Suppressed','#9a7d2b'],delayed:['⏳ Delayed','#9a7d2b']};
+  tbody.innerHTML=list.map((l)=>{
+    const st=touchStatus(l);
+    const sl=statusLabel[st]||st;
+    const sc=statusClass[st]||'bbl';
+    const chan=l.channel==='mms'?'📱 MMS':'✉️ Email';
+    let del='';
+    if(l.channel==='email' && l.email_status && delMap[l.email_status]){
+      const d=delMap[l.email_status];
+      del=' <span style="display:inline-block;padding:1px 6px;border-radius:20px;font-size:9px;font-weight:600;background:'+d[1]+'18;color:'+d[1]+'">'+d[0]+'</span>';
+    }
+    return `<tr>
+      <td><div class="tbz">${l.business_name||'—'}</div><div class="tbs">${l.city||''}</div></td>
+      <td>${chan}${del}</td>
+      <td>${l.email||l.phone||'—'}</td>
+      <td>${l.category||'—'}</td>
       <td><span class="badge ${sc}">${sl}</span></td>
-      <td>${c.lastActivity||c.added||'—'}</td>
-      <td onclick="event.stopPropagation();deleteContact(${ri})" style="text-align:center"><span class="delx" title="Delete contact">🗑</span></td>
+      <td>${l.email_status_at?new Date(l.email_status_at).toLocaleDateString():'—'}</td>
+      <td style="text-align:center">—</td>
     </tr>`;
   }).join('');
 }
@@ -834,6 +857,13 @@ function updStats(){
   txt('stotSub',pTot+' in pipeline · '+pSent+' pitched');
   txt('srdy',rdy);
   txt('srdySub',pReady+' cleared · '+pSent+' sent');
+  // Contacts Reached — everyone we've actually touched (email sent OR mms pitched)
+  const emailReached = PIPE.filter(l=>l.channel==='email' && l.email_sent_at).length;
+  const mmsReached = PIPE.filter(l=>l.channel==='mms' && l.status==='pitched').length;
+  const totalReached = emailReached + mmsReached;
+  const bounced = PIPE.filter(l=>['bounced','failed'].includes(l.email_status)).length;
+  txt('sdel',totalReached);
+  txt('sdelSub',emailReached+' email · '+mmsReached+' text'+(bounced?' · '+bounced+' bounced':''));
   txt('srep',sites);
   txt('scust',cust);
   txt('bc',tot);
